@@ -54,10 +54,12 @@ const runBot = async (options = {}) => {
       "--disable-blink-features=AutomationControlled",
       "--disable-infobars",
       "--disable-web-security",
-      "--disable-features=IsolateOrigins,site-per-process"
+      "--disable-features=PasswordLeakDetection,PasswordManager,PasswordManagerOnboarding,PasswordCheck,PasswordProtectionWarningTrigger,IsolateOrigins,site-per-process"
     ];
     executablePath = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
   }
+
+  utils.log(`use arguments: ${launchArgs}`);
 
   let browser;
   try {
