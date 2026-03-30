@@ -56,7 +56,8 @@ const runBot = async (options = {}) => {
       "--disable-web-security",
       "--disable-features=PasswordLeakDetection,PasswordManager,PasswordManagerOnboarding,PasswordCheck,PasswordProtectionWarningTrigger,IsolateOrigins,site-per-process"
     ];
-    executablePath = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
+    // executablePath = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
+    executablePath = "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe";
   }
 
   utils.log(`use arguments: ${launchArgs}`);
