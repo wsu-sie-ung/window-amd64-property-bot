@@ -48,7 +48,8 @@ const runBot = async (options = {}) => {
   } else if (process.platform === "darwin") {
     executablePath = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
   } else {
-    launchArgs.push("--disable-web-security");
+    launchArgs.push("--disable-web-security","--disable-sync","--disable-client-side-phishing-detection","--start-maximized");
+  
     executablePath = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
     // executablePath = "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe";
   }
@@ -64,6 +65,7 @@ const runBot = async (options = {}) => {
       userDataDir,
       executablePath,
       args: launchArgs,
+      defaultViewport: null,
     });
 
     const pages = await browser.pages();
