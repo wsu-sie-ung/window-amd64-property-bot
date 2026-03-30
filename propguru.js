@@ -47,7 +47,7 @@ const runBot = async (options = {}) => {
     executablePath = process.env.CHROME_PATH || "/usr/bin/chromium-browser";
   } else if (process.platform === "darwin") {
     executablePath = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
-  } else if (process.platform === "win32") {
+  } else {
     launchArgs = [
       "--no-first-run",
       "--no-default-browser-check",
