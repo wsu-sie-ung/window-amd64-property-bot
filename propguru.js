@@ -48,14 +48,7 @@ const runBot = async (options = {}) => {
   } else if (process.platform === "darwin") {
     executablePath = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
   } else {
-    launchArgs = [
-      "--no-first-run",
-      "--no-default-browser-check",
-      "--disable-blink-features=AutomationControlled",
-      "--disable-infobars",
-      "--disable-web-security",
-      "--disable-features=PasswordLeakDetection,PasswordManager,PasswordManagerOnboarding,PasswordCheck,PasswordProtectionWarningTrigger,IsolateOrigins,site-per-process"
-    ];
+    launchArgs.push("--disable-web-security");
     // executablePath = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
     executablePath = "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe";
   }
