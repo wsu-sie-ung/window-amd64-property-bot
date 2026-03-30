@@ -60,6 +60,7 @@ const runBot = async (options = {}) => {
   }
 
   utils.log(`use arguments: ${launchArgs}`);
+  utils.log(`use execution path : ${executablePath}`);
 
   let browser;
   try {
