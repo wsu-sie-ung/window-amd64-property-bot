@@ -2,6 +2,7 @@
 node_modules/
 jspm_packages/
 profiles/
+propertyguru/
 
 # Chrome/Browser profile data
 chrome-profile/
