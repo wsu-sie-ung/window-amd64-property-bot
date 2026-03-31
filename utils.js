@@ -943,16 +943,18 @@ async function performLogin(page, options, requestedAgentId) {
 async function clickCreateListing(page) {
   const targetSelector = "#dashboard > div.jss10.jss3 > div > div:nth-child(2) > div.jss34 > div > span > a"
   const button = await runStep("Wait for target button", async () => page.waitForSelector(targetSelector, { timeout: 30000 }))
-
-  await runStep("Click Create Listing button", async () =>
-    Promise.all([
+  log(`x log 10 : found create listing button`);
+  await runStep("Click Create Listing button", async () => {
+    log(`x log 10-1 : try to click create listing button`);
+    return Promise.all([
       // page.waitForNavigation({ waitUntil: ["domcontentloaded", "networkidle2"] }),
-      page.waitForFunction(() =>
-        {return window.location.href.includes('create-listing')},
-      {timeout: 30000}
+      page.waitForFunction(() => { return window.location.href.includes('create-listing') },
+        { timeout: 30000 }
       ),
       button.click()
     ])
+  }
+
   )
 }
 
