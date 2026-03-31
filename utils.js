@@ -946,13 +946,15 @@ async function clickCreateListing(page) {
   log(`x log 10 : found create listing button`);
   await runStep("Click Create Listing button", async () => {
     log(`x log 10-1 : try to click create listing button`);
-    return Promise.all([
-      // page.waitForNavigation({ waitUntil: ["domcontentloaded", "networkidle2"] }),
-      page.waitForFunction(() => { return window.location.href.includes('create-listing') },
-        { timeout: 30000 }
-      ),
-      button.click()
-    ])
+    try {
+      return Promise.all([
+        page.waitForNavigation({ waitUntil: ["domcontentloaded", "networkidle2"] }),
+        button.click()
+      ])
+    } catch (err) {
+      log(`x log 10-2 : click Creating Listing Error ${err}`);
+      return false;
+    }
   }
 
   )
