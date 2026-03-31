@@ -102,7 +102,7 @@ async function checkAndPauseIfCaptcha(page, autoPause = true) {
 
   if (captchaDetected) {
     log("CAPTCHA DETECTED")
-    
+
     if (autoPause) {
       const minDelay = 12 * 60 * 60 * 1000  // 12 hours
       const maxDelay = 24 * 60 * 60 * 1000  // 24 hours
@@ -388,7 +388,7 @@ async function selectDirection(page, unitInfo) {
     const rawText = await item.evaluate(el => el.textContent.trim());
     // Normalize option text: remove hyphens, spaces, to lowercase
     const normalizedOption = rawText.toLowerCase().replace(/[- ]/g, '');
-    
+
     if (normalizedOption === targetDirection) {
       await item.click();
       clicked = true;
@@ -682,20 +682,20 @@ async function handleNewFeatureModal(page) {
       // Wait for modal using multiple potential selectors
       // We check for visibility by ensuring offsetWidth > 0 or class 'show' is present
       await page.waitForFunction(() => {
-        const el = document.querySelector('[da-id="new-feature-modal"]') || 
-                   document.querySelector('.new-feature-modal.modal.show');
+        const el = document.querySelector('[da-id="new-feature-modal"]') ||
+          document.querySelector('.new-feature-modal.modal.show');
         return el && (el.offsetWidth > 0 || el.offsetHeight > 0 || window.getComputedStyle(el).display !== 'none');
       }, { timeout: 8000 });
-      
+
       log('New feature modal detected');
-      
+
       // Give it a split second to render buttons
       await delay(1000);
 
       await page.evaluate(() => {
         const continueBtn = document.querySelector('[da-id="new-feature-modal-continue-button"]');
         const closeBtn = document.querySelector('[da-id="modal-close-button"]');
-        
+
         if (continueBtn) {
           continueBtn.click();
           console.log('Clicked "Got it" button');
@@ -707,19 +707,19 @@ async function handleNewFeatureModal(page) {
           const modal = document.querySelector('[da-id="new-feature-modal"]') || document.querySelector('.new-feature-modal');
           const btn = modal?.querySelector('.btn-primary');
           if (btn) {
-             btn.click();
-             console.log('Clicked primary button (fallback)');
+            btn.click();
+            console.log('Clicked primary button (fallback)');
           }
         }
       });
-      
+
       // Wait for modal to disappear
       await page.waitForFunction(() => {
-        const el = document.querySelector('[da-id="new-feature-modal"]') || 
-                   document.querySelector('.new-feature-modal.modal.show');
+        const el = document.querySelector('[da-id="new-feature-modal"]') ||
+          document.querySelector('.new-feature-modal.modal.show');
         return !el || el.offsetParent === null;
-      }, { timeout: 3000 }).catch(() => {});
-      
+      }, { timeout: 3000 }).catch(() => { });
+
     } catch (e) {
       log('No new feature modal appeared (or timed out waiting for it)');
     }
@@ -792,18 +792,18 @@ async function uploadImages(page, unitInfo) {
       try {
         const uploadBtnSelector = 'button[da-id="upload-images-card"]';
         await page.waitForSelector(uploadBtnSelector, { visible: true, timeout: 10000 });
-        
+
         console.log("Clicking upload button and waiting for file chooser...");
         const [fileChooser] = await Promise.all([
           page.waitForFileChooser(),
           page.click(uploadBtnSelector),
         ]);
-        
+
         await fileChooser.accept(filesToUpload);
         console.log(`Uploaded ${filesToUpload.length} images`);
-        
+
         // Wait for upload to likely complete
-        await delay(5000); 
+        await delay(5000);
       } catch (e) {
         console.error("Error during file upload:", e);
       }
@@ -811,9 +811,9 @@ async function uploadImages(page, unitInfo) {
 
     // Cleanup local files
     for (const file of filesToUpload) {
-      try { fs.unlinkSync(file); } catch (e) {}
+      try { fs.unlinkSync(file); } catch (e) { }
     }
-    try { fs.rmdirSync(tmpDir); } catch (e) {}
+    try { fs.rmdirSync(tmpDir); } catch (e) { }
   });
 }
 
@@ -912,7 +912,7 @@ async function performLogin(page, options, requestedAgentId) {
 
   if (!loginEmail || !loginPassword) throw new Error("Missing PropertyGuru login email/password")
 
-    
+
 
   await runStep("Type email", async () => page.type(emailSelector, loginEmail, { delay: 120 }))
   await runStep("Type password", async () => page.type(passwordSelector, loginPassword, { delay: 200 }))
@@ -946,7 +946,11 @@ async function clickCreateListing(page) {
 
   await runStep("Click Create Listing button", async () =>
     Promise.all([
-      page.waitForNavigation({ waitUntil: ["domcontentloaded", "networkidle2"] }),
+      // page.waitForNavigation({ waitUntil: ["domcontentloaded", "networkidle2"] }),
+      page.waitForFunction(() =>
+        {return window.location.href.includes('create-listing')},
+      {timeout: 30000}
+      ),
       button.click()
     ])
   )

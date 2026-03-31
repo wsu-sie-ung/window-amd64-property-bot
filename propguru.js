@@ -2,6 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const puppeteer = require("puppeteer-extra");
 const StealthPlugin = require("puppeteer-extra-plugin-stealth");
+const UserPrefsPlugin = require("puppeteer-extra-plugin-user-preferences");
 const utils = require("./utils");
 
 puppeteer.use(StealthPlugin());
@@ -48,8 +49,8 @@ const runBot = async (options = {}) => {
   } else if (process.platform === "darwin") {
     executablePath = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
   } else {
-    launchArgs.push("--disable-web-security","--disable-sync","--disable-client-side-phishing-detection","--start-maximized");
-  
+    launchArgs.push("--disable-web-security", "--disable-sync", "--disable-client-side-phishing-detection", "--start-maximized");
+
     executablePath = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
     // executablePath = "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe";
   }
@@ -58,6 +59,16 @@ const runBot = async (options = {}) => {
   utils.log(`use execution path : ${executablePath}`);
 
   let browser;
+  puppeteer.use(
+    UserPrefsPlugin({
+      userPrefs: {
+        credentials_enable_service: false,   // ❌ disable save password
+        profile: {
+          password_manager_enabled: false,   // ❌ disable password manager
+        },
+      },
+    })
+  );
   try {
     browser = await puppeteer.launch({
       headless: isHeadless,
@@ -85,7 +96,7 @@ const runBot = async (options = {}) => {
         console.error(new Date().toISOString(), "BOT CHALLENGE DETECTED", url, failure);
         try {
           await page.close();
-        } catch (_) {}
+        } catch (_) { }
         return;
       }
       throw new Error(`REQUEST FAILED: ${url} ${failure}`);
@@ -173,7 +184,7 @@ const runBot = async (options = {}) => {
       await utils.setParking(page, options.unitInfo);
       await utils.setFurnishingStatus(page, options.unitInfo);
       await utils.setNumberOfTenants(page, options.unitInfo.tenants);
-      await utils.setAllowedGender(page, options.unitInfo.gender); 
+      await utils.setAllowedGender(page, options.unitInfo.gender);
     } else {
       // RENT ENTIRE UNIT FLOW
       await utils.selectTitleType(page, options.unitInfo);
@@ -236,8 +247,8 @@ const runBot = async (options = {}) => {
 
     // console.log('"Confirm" button clicked');
 
-    
-   
+
+
 
     utils.log("All buttons clicked. Task complete.");
     return { success: true, captchaDetected: false };
@@ -255,7 +266,7 @@ const runBot = async (options = {}) => {
         await new Promise((res) => setTimeout(res, 1500));
         // await browser.close();
       }
-    } catch (_) {}
+    } catch (_) { }
   }
 };
 
