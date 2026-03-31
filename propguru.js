@@ -136,7 +136,7 @@ const runBot = async (options = {}) => {
     await utils.runStep("Human mouse on listing page", async () =>
       utils.randomMouseMove(page, { moves: 2 })
     );
-    await utils.runStep("Random delay", async () => utils.randomDelay(300, 600));
+    await utils.runStep("Random delay", async () => utils.randomDelay(2000, 3000));
 
     // CREATE LISTING
     await utils.clickCreateListing(page);
