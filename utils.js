@@ -948,7 +948,11 @@ async function clickCreateListing(page) {
     log(`x log 10-1 : try to click create listing button`);
     try {
       return Promise.all([
-        page.waitForNavigation({ waitUntil: ["domcontentloaded", "networkidle2"] }),
+        // page.waitForNavigation({ waitUntil: ["domcontentloaded", "networkidle2"] }),
+        page.waitForFunction(() =>
+          window.location.href.includes("create-listing"),
+          { timeout: 30000 }
+        ),
         button.click()
       ])
     } catch (err) {
