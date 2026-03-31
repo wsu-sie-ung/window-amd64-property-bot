@@ -51,8 +51,8 @@ const runBot = async (options = {}) => {
   } else {
     launchArgs.push("--disable-web-security", "--disable-sync", "--disable-client-side-phishing-detection", "--start-maximized");
 
-    executablePath = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
-    // executablePath = "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe";
+    // executablePath = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
+    executablePath = "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe";
   }
 
   utils.log(`use arguments: ${launchArgs}`);
