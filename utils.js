@@ -885,6 +885,7 @@ module.exports = {
   uncheckIProp,
   clickPostNow,
   performLogin,
+  clickSkipModal,
   clickCreateListing,
   selectRentingOption,
   selectImmediateDate,
