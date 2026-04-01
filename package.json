@@ -19,7 +19,7 @@
     "jsonwebtoken": "^9.0.3",
     "mysql2": "^3.14.5",
     "openai": "^6.17.0",
-    "puppeteer-core": "^24.40.0",
+    "puppeteer": "^24.40.0",
     "puppeteer-extra": "^3.3.6",
     "puppeteer-extra-plugin-stealth": "^2.11.2",
     "puppeteer-extra-plugin-user-preferences": "^2.4.1",
