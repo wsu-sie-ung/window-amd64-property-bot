@@ -98,6 +98,9 @@ const runBot = async (options = {}) => {
         } catch (_) { }
         return;
       }
+      if (res.url().includes('cdn.pgimgs.com')) {
+        utils.log(`x log cors : ${res.status()}, ${res.headers()} `);
+      }
       throw new Error(`REQUEST FAILED: ${url} ${failure}`);
     });
 
