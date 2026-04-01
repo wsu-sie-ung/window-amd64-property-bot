@@ -939,6 +939,53 @@ async function performLogin(page, options, requestedAgentId) {
   })
 }
 
+//
+
+// Click Skip Modal
+// .MuiDialog-container.MuiDialog-scrollPaper
+async function clickSkipModal(page) {
+  const targetSelector = ".MuiButtonBase-root.MuiButton-root.MuiButton-text.jss125.MuiButton-textPrimary";
+
+  let button = null;
+
+  try {
+    button = await runStep("Wait for skip modal button", async () =>
+      page.waitForSelector(targetSelector, { timeout: 30000 })
+    );
+  } catch (err) {
+    log("x log 9 : skip modal not found, nothing to do");
+    return false;
+  }
+
+  if (!button) {
+    log("x log 9-1 : skip modal button handle is null");
+    return false;
+  }
+
+  log("x log 10 : found skip modal button");
+
+  try {
+    await runStep("Click skip modal button", async () => {
+      log("x log 10-1 : clicking skip modal button");
+
+      await Promise.all([
+        button.click(),
+        page.waitForFunction(
+          () => !document.querySelector(".MuiDialog-container.MuiDialog-scrollPaper"), // wait until modal disappears
+          { timeout: 5000 }
+        ),
+      ]);
+
+      log("x log 10-2 : skip modal closed successfully");
+    });
+
+    return true;
+  } catch (err) {
+    log("x log 10-3 : failed to close skip modal: " + err);
+    return false;
+  }
+}
+
 // Click Create Listing
 async function clickCreateListing(page) {
   const targetSelector = "#dashboard > div.jss10.jss3 > div > div:nth-child(2) > div.jss34 > div > span > a"
