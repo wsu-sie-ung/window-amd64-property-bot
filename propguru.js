@@ -84,7 +84,7 @@ const runBot = async (options = {}) => {
     // Error handling
     page.on("pageerror", (err) => console.warn(new Date().toISOString(), "PAGE JS ERROR", err));
     page.on("error", (err) => console.error(new Date().toISOString(), "PAGE CRASHED", err));
-    page.on("requestfailed", async (req) => {
+    page.on("requestfailed", async (req, res) => {
       const url = req.url();
       const failure = req.failure() && req.failure().errorText;
       if (utils.REQUEST_IGNORES.some((re) => re.test(url))) return;
