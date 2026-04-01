@@ -138,6 +138,8 @@ const runBot = async (options = {}) => {
     );
     await utils.runStep("Random delay", async () => utils.randomDelay(2000, 3000));
 
+    await utils.clickSkipModal(page)
+
     // CREATE LISTING
     await utils.clickCreateListing(page);
 
