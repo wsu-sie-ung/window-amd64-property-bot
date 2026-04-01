@@ -48,7 +48,7 @@ const runBot = async (options = {}) => {
   } else if (process.platform === "darwin") {
     executablePath = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
   } else {
-    launchArgs.push("--disable-sync", "--disable-client-side-phishing-detection", "--start-maximized");
+    launchArgs.push("--disable-web-security", "--disable-sync", "--disable-client-side-phishing-detection", "--start-maximized");
 
     // executablePath = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
     executablePath = "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe";
@@ -84,7 +84,7 @@ const runBot = async (options = {}) => {
     // Error handling
     page.on("pageerror", (err) => console.warn(new Date().toISOString(), "PAGE JS ERROR", err));
     page.on("error", (err) => console.error(new Date().toISOString(), "PAGE CRASHED", err));
-    page.on("requestfailed", async (req, res) => {
+    page.on("requestfailed", async (req) => {
       const url = req.url();
       const failure = req.failure() && req.failure().errorText;
       if (utils.REQUEST_IGNORES.some((re) => re.test(url))) return;
@@ -98,9 +98,7 @@ const runBot = async (options = {}) => {
         } catch (_) { }
         return;
       }
-      if (res.url().includes('cdn.pgimgs.com')) {
-        utils.log(`x log cors : ${res.status()}, ${res.headers()} `);
-      }
+     
       throw new Error(`REQUEST FAILED: ${url} ${failure}`);
     });
 
