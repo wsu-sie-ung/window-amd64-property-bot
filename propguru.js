@@ -48,7 +48,8 @@ const runBot = async (options = {}) => {
   } else if (process.platform === "darwin") {
     executablePath = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
   } else {
-    launchArgs.push("--disable-web-security", "--disable-sync", "--disable-client-side-phishing-detection", "--start-maximized");
+    // launchArgs.push("--disable-web-security", "--disable-sync", "--disable-client-side-phishing-detection", "--start-maximized");
+    launchArgs.push("--disable-sync", "--start-maximized");
 
     // executablePath = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
     executablePath = "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe";
@@ -98,8 +99,8 @@ const runBot = async (options = {}) => {
         } catch (_) { }
         return;
       }
-     
-      throw new Error(`REQUEST FAILED: ${url} ${failure}`);
+     console.log(`REQUEST FAILED: ${url} ${failure}`)
+      // throw new Error(`REQUEST FAILED: ${url} ${failure}`);
     });
 
     // Navigate dashboard
