@@ -674,7 +674,51 @@ async function setPropertyDescription(page, unitInfo) {
 
   console.log('Property description filled');
 }
+//  data-id
+// modal-close-button data-id
+async function handleConfirmPostWithCreditModal(page) {
+  await runStep("Handle confirm post with credit Modal", async () => {
+    try {
+      // Wait for modal using multiple potential selectors
+      // We check for visibility by ensuring offsetWidth > 0 or class 'show' is present
+      await page.waitForFunction(() => {
+        const el = document.querySelector('[da-id="hive-modal"]') ||
+          document.querySelector('[da-id="modal-close-button"]');
+        return el && (el.offsetWidth > 0 || el.offsetHeight > 0 || window.getComputedStyle(el).display !== 'none');
+      }, { timeout: 8000 });
 
+      log('Confirm Post with credit modal detected');
+
+      // Give it a split second to render buttons
+      await delay(1000);
+
+      await page.evaluate(() => {
+        // const continueBtn = document.querySelector('[da-id="new-feature-modal-continue-button"]');
+        continueBtn = null
+        const closeBtn = document.querySelector('[da-id="modal-close-button"]');
+
+        if (continueBtn) {
+          continueBtn.click();
+          console.log('Clicked "Got it" button');
+        } else if (closeBtn) {
+          closeBtn.click();
+          console.log('Clicked close button');
+        } else {
+          
+        }
+      });
+
+      // Wait for modal to disappear
+      await page.waitForFunction(() => {
+        const el = document.querySelector('[da-id="hive-modal"]');
+        return !el || el.offsetParent === null;
+      }, { timeout: 3000 }).catch(() => { });
+
+    } catch (e) {
+      log('No confirn post with credit modal appeared (or timed out waiting for it)');
+    }
+  });
+}
 // Handle "New Feature" modal (auto-tagging etc)
 async function handleNewFeatureModal(page) {
   await runStep("Handle New Feature Modal", async () => {
@@ -839,6 +883,8 @@ const uncheckIProp = async (page) => {
   }
 }
 
+
+
 const clickPostNow = async (page) => {
   const postNowSelector = 'button[da-id="footer-post-now-button"]';
   await page.waitForSelector(postNowSelector, { visible: true, timeout: 10000 });
@@ -879,6 +925,7 @@ module.exports = {
   setRentalPrice,
   setHeadline,
   setPropertyDescription,
+  handleConfirmPostWithCreditModal,
   handleNewFeatureModal,
   uploadImages,
   clickNextButton,
