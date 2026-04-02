@@ -715,7 +715,7 @@ async function handleConfirmPostWithCreditModal(page) {
       }, { timeout: 3000 }).catch(() => { });
 
     } catch (e) {
-      log('No confirn post with credit modal appeared (or timed out waiting for it)');
+      log(`No confirn post with credit modal appeared (or timed out waiting for it) -> ${e}`);
     }
   });
 }
