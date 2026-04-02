@@ -230,6 +230,7 @@ const runBot = async (options = {}) => {
 
     await utils.uncheckIProp(page);
     await utils.clickNextButton(page);
+    await utils.handleNewFeatureModal(page);
 
     await utils.clickPostNow(page);
 
