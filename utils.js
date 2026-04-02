@@ -891,11 +891,15 @@ const clickPostNow = async (page) => {
   await page.evaluate(selector => {
     const btn = document.querySelector(selector);
     if (btn) {
+      console.log('"Post now" button clicked via evaluate');
       btn.scrollIntoView({ block: 'center' });
       btn.click();
     }
+    else {
+      console.log('No "Post now" button');
+    }
   }, postNowSelector);
-  console.log('"Post now" button clicked via evaluate');
+  
 }
 
 
