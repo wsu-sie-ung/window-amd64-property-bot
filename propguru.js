@@ -137,7 +137,7 @@ const runBot = async (options = {}) => {
     await utils.runStep("Human mouse on listing page", async () =>
       utils.randomMouseMove(page, { moves: 2 })
     );
-    await utils.runStep("Random delay", async () => utils.randomDelay(2000, 3000));
+    await utils.runStep("Random delay", async () => utils.randomDelay(500, 1000));
 
     await utils.clickSkipModal(page)
 
