@@ -704,7 +704,7 @@ async function handleConfirmPostWithCreditModal(page) {
           closeBtn.click();
           console.log('Clicked close button');
         } else {
-          
+
         }
       });
 
@@ -716,6 +716,39 @@ async function handleConfirmPostWithCreditModal(page) {
 
     } catch (e) {
       log(`No confirn post with credit modal appeared (or timed out waiting for it) -> ${e}`);
+    }
+  });
+}
+async function handlePreviewLoadingErrorModal(page) {
+  await runStep("Handle Feedback overlay container", async () => {
+    try {
+      // Wait for modal using multiple potential selectors
+      // We check for visibility by ensuring offsetWidth > 0 or class 'show' is present
+      await page.waitForFunction(() => {
+        const el = document.querySelector('[da-id="feedback-overlay-container"]');
+        return el && (el.offsetWidth > 0 || el.offsetHeight > 0 || window.getComputedStyle(el).display !== 'none');
+      }, { timeout: 8000 });
+
+      log('feedback overlay modal detected');
+
+      // Give it a split second to render buttons
+      await delay(1000);
+
+      await page.evaluate(() => {
+        document.querySelector('[da-id="feedback-overlay-container"]')?.remove();
+        document.querySelector('.modal-backdrop')?.remove();
+
+      });
+
+      // Wait for modal to disappear
+      await page.waitForFunction(() => {
+        const el = document.querySelector('[da-id="feedback-overlay-container"]') ||
+          document.querySelector('.modal-backdrop');
+        return !el || el.offsetParent === null;
+      }, { timeout: 3000 }).catch(() => { });
+
+    } catch (e) {
+      log('No new feature modal appeared (or timed out waiting for it)');
     }
   });
 }
@@ -899,7 +932,7 @@ const clickPostNow = async (page) => {
       console.log('No "Post now" button');
     }
   }, postNowSelector);
-  
+
 }
 
 
@@ -929,6 +962,7 @@ module.exports = {
   setRentalPrice,
   setHeadline,
   setPropertyDescription,
+  handlePreviewLoadingErrorModal,
   handleConfirmPostWithCreditModal,
   handleNewFeatureModal,
   uploadImages,
