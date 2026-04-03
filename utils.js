@@ -726,10 +726,11 @@ async function handlePreviewLoadingErrorModal(page) {
       // We check for visibility by ensuring offsetWidth > 0 or class 'show' is present
       await page.waitForFunction(() => {
         const el = document.querySelector('.feedback-overlay');
+        if(el) log('feedback overlay modal detected');
         return el && (el.offsetWidth > 0 || el.offsetHeight > 0 || window.getComputedStyle(el).display !== 'none');
       }, { timeout: 8000 });
 
-      log('feedback overlay modal detected');
+      
 
       // Give it a split second to render buttons
       await delay(1000);
@@ -764,10 +765,11 @@ async function handleNewFeatureModal(page) {
       await page.waitForFunction(() => {
         const el = document.querySelector('[da-id="new-feature-modal"]') ||
           document.querySelector('.new-feature-modal.modal.show');
+           if(el) log('credit confirm modal detected');
         return el && (el.offsetWidth > 0 || el.offsetHeight > 0 || window.getComputedStyle(el).display !== 'none');
       }, { timeout: 8000 });
 
-      log('New feature modal detected');
+      // log('New feature modal detected at stage loading preview');
 
       // Give it a split second to render buttons
       await delay(1000);
