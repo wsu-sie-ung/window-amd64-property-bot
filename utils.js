@@ -725,7 +725,7 @@ async function handlePreviewLoadingErrorModal(page) {
       // Wait for modal using multiple potential selectors
       // We check for visibility by ensuring offsetWidth > 0 or class 'show' is present
       await page.waitForFunction(() => {
-        const el = document.querySelector('[da-id="feedback-overlay-container"]');
+        const el = document.querySelector('.feedback-overlay');
         return el && (el.offsetWidth > 0 || el.offsetHeight > 0 || window.getComputedStyle(el).display !== 'none');
       }, { timeout: 8000 });
 
@@ -735,7 +735,7 @@ async function handlePreviewLoadingErrorModal(page) {
       await delay(1000);
 
       await page.evaluate(() => {
-        const overlay = document.querySelector('[da-id="feedback-overlay-container"]');
+        const overlay = document.querySelector('.feedback-overlay');
         if (overlay) overlay.style.display = 'none';
 
         const backdrop = document.querySelector('.modal-backdrop');
@@ -745,13 +745,13 @@ async function handlePreviewLoadingErrorModal(page) {
 
       // Wait for modal to disappear
       await page.waitForFunction(() => {
-        const el = document.querySelector('[da-id="feedback-overlay-container"]') ||
+        const el = document.querySelector('.feedback-overlay') ||
           document.querySelector('.modal-backdrop');
         return !el || el.offsetParent === null;
       }, { timeout: 3000 }).catch(() => { });
 
     } catch (e) {
-      log('No new feature modal appeared (or timed out waiting for it)');
+      log('feedback overlay modal');
     }
   });
 }
