@@ -1049,7 +1049,7 @@ async function clickSkipModal(page) {
 
   try {
     button = await runStep("Wait for skip modal button", async () =>
-      page.waitForSelector(targetSelector, { timeout: 30000 })
+      page.waitForSelector(targetSelector, { timeout: 8000 })
     );
   } catch (err) {
     log("x log 9 : skip modal not found, nothing to do");
