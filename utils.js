@@ -771,19 +771,22 @@ async function handleNewFeatureModal(page) {
       // Wait for modal using multiple potential selectors
       // We check for visibility by ensuring offsetWidth > 0 or class 'show' is present
       await page.waitForFunction(() => {
+        
         const el = document.querySelector('[da-id="new-feature-modal"]') ||
           document.querySelector('.new-feature-modal.modal.show');
-        if (el) log('credit confirm modal detected');
+     
         return el && (el.offsetWidth > 0 || el.offsetHeight > 0 || window.getComputedStyle(el).display !== 'none');
       }, { timeout: 8000 });
 
-      // log('New feature modal detected at stage loading preview');
+      log('New feature modal detected');
 
       // Give it a split second to render buttons
       await delay(1000);
 
       await page.evaluate(() => {
+        // new-feature-modal-continue-button
         const continueBtn = document.querySelector('[da-id="new-feature-modal-continue-button"]');
+        // modal-close-button
         const closeBtn = document.querySelector('[da-id="modal-close-button"]');
 
         if (continueBtn) {
@@ -1049,7 +1052,7 @@ async function clickSkipModal(page) {
 
   try {
     button = await runStep("Wait for skip modal button", async () =>
-      page.waitForSelector(targetSelector, { timeout: 8000 })
+      page.waitForSelector(targetSelector, { timeout: 30000 })
     );
   } catch (err) {
     log("x log 9 : skip modal not found, nothing to do");
