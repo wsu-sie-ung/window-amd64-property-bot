@@ -735,8 +735,11 @@ async function handlePreviewLoadingErrorModal(page) {
       await delay(1000);
 
       await page.evaluate(() => {
-        document.querySelector('[da-id="feedback-overlay-container"]')?.remove();
-        document.querySelector('.modal-backdrop')?.remove();
+        const overlay = document.querySelector('[da-id="feedback-overlay-container"]');
+        if (overlay) overlay.style.display = 'none';
+
+        const backdrop = document.querySelector('.modal-backdrop');
+        if (backdrop) backdrop.style.display = 'none';
 
       });
 
