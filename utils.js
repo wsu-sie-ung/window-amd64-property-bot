@@ -682,8 +682,8 @@ async function handleConfirmPostWithCreditModal(page) {
       // Wait for modal using multiple potential selectors
       // We check for visibility by ensuring offsetWidth > 0 or class 'show' is present
       await page.waitForFunction(() => {
-        const el = document.querySelector('[da-id="hive-modal"]') ||
-          document.querySelector('[da-id="modal-close-button"]');
+        const el = document.querySelector('.fade.hui-modal.modal.show')
+
         return el && (el.offsetWidth > 0 || el.offsetHeight > 0 || window.getComputedStyle(el).display !== 'none');
       }, { timeout: 8000 });
 
@@ -695,6 +695,7 @@ async function handleConfirmPostWithCreditModal(page) {
       await page.evaluate(() => {
         // const continueBtn = document.querySelector('[da-id="new-feature-modal-continue-button"]');
         continueBtn = null
+
         const closeBtn = document.querySelector('[da-id="modal-close-button"]');
 
         if (continueBtn) {
@@ -726,21 +727,28 @@ async function handlePreviewLoadingErrorModal(page) {
       // We check for visibility by ensuring offsetWidth > 0 or class 'show' is present
       await page.waitForFunction(() => {
         const el = document.querySelector('.feedback-overlay');
-        if(el) log('feedback overlay modal detected');
+        if (el) log('feedback overlay modal detected');
         return el && (el.offsetWidth > 0 || el.offsetHeight > 0 || window.getComputedStyle(el).display !== 'none');
       }, { timeout: 8000 });
 
-      
+
 
       // Give it a split second to render buttons
       await delay(1000);
 
       await page.evaluate(() => {
         const overlay = document.querySelector('.feedback-overlay');
-        if (overlay) overlay.style.display = 'none';
+        if (overlay) {
+          log(`remove feedback-overlay modal`);
+          overlay.style.display = 'none';
+        }
+
 
         const backdrop = document.querySelector('.modal-backdrop');
-        if (backdrop) backdrop.style.display = 'none';
+        if (backdrop) {
+          log(`remove modal-backdrop modal`);
+          backdrop.style.display = 'none';
+        }
 
       });
 
@@ -765,7 +773,7 @@ async function handleNewFeatureModal(page) {
       await page.waitForFunction(() => {
         const el = document.querySelector('[da-id="new-feature-modal"]') ||
           document.querySelector('.new-feature-modal.modal.show');
-           if(el) log('credit confirm modal detected');
+        if (el) log('credit confirm modal detected');
         return el && (el.offsetWidth > 0 || el.offsetHeight > 0 || window.getComputedStyle(el).display !== 'none');
       }, { timeout: 8000 });
 
