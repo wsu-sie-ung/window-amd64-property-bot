@@ -776,7 +776,7 @@ async function handleNewFeatureModal(page) {
           document.querySelector('.new-feature-modal.modal.show');
      
         return el && (el.offsetWidth > 0 || el.offsetHeight > 0 || window.getComputedStyle(el).display !== 'none');
-      }, { timeout: 8000 });
+      }, { timeout: 10000 });
 
       log('New feature modal detected');
 
@@ -814,7 +814,7 @@ async function handleNewFeatureModal(page) {
       }, { timeout: 3000 }).catch(() => { });
 
     } catch (e) {
-      log('No new feature modal appeared (or timed out waiting for it)');
+      log(`No new feature modal appeared (or timed out waiting for it) error : ${e}`);
     }
   });
 }
