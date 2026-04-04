@@ -745,7 +745,6 @@ async function handlePreviewLoadingErrorModal(page) {
           overlay.style.display = 'none';
         }
 
-
         const backdrop = document.querySelector('.modal-backdrop');
         if (backdrop) {
           log(`remove modal-backdrop modal`);
