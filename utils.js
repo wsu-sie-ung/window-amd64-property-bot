@@ -682,7 +682,9 @@ async function handleConfirmPostWithCreditModal(page) {
       // Wait for modal using multiple potential selectors
       // We check for visibility by ensuring offsetWidth > 0 or class 'show' is present
       await page.waitForFunction(() => {
+        // fade hui-modal modal show
         const el = document.querySelector('.fade.hui-modal.modal.show')
+        // modal-dialog modal-sm modal-dialog-centered
 
         return el && (el.offsetWidth > 0 || el.offsetHeight > 0 || window.getComputedStyle(el).display !== 'none');
       }, { timeout: 8000 });
@@ -696,8 +698,8 @@ async function handleConfirmPostWithCreditModal(page) {
         // const continueBtn = document.querySelector('[da-id="new-feature-modal-continue-button"]');
         continueBtn = null
 
-        const closeBtn = document.querySelector('[da-id="modal-close-button"]');
-
+        const closeBtn = document.querySelector('.hui-button.btn-round.hui-btn-close.btn.btn-icon');
+        
         if (continueBtn) {
           continueBtn.click();
           console.log('Clicked "Got it" button');
