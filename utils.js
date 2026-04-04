@@ -701,16 +701,13 @@ async function handleConfirmPostWithCreditModal(page) {
         // const continueBtn = document.querySelector('[da-id="new-feature-modal-continue-button"]');
         continueBtn = null
 
-        const closeBtn = document.querySelector('.hui-button.btn-round.hui-btn-close.btn.btn-icon');
+        const buttons = document.querySelectorAll('.hui-button.flex-grow-1.btn.btn-primary.btn-lg');
 
-        if (continueBtn) {
-          continueBtn.click();
-          console.log('confitm modal Clicked "Got it" button');
-        } else if (closeBtn) {
-          closeBtn.click();
-          console.log('confirm buttn Clicked close button');
-        } else {
+        const submitBtn = buttons[1]; // second button (0-based index)
 
+        if (submitBtn) {
+          submitBtn.click();
+          console.log('confirm modal Clicked second button');
         }
       });
 

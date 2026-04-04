@@ -232,9 +232,11 @@ const runBot = async (options = {}) => {
     await utils.clickNextButton(page);
     // await utils.handleNewFeatureModal(page);
     await utils.handlePreviewLoadingErrorModal(page);
-    await utils.handleConfirmPostWithCreditModal(page);
+    
 
     await utils.clickPostNow(page);
+
+    await utils.handleConfirmPostWithCreditModal(page);
 
     const confirmModalSelector = ".modal-dialog.modal-sm.modal-dialog-centered";
     await page.waitForSelector(confirmModalSelector, { visible: true, timeout: 10000 });
