@@ -744,13 +744,13 @@ async function handlePreviewLoadingErrorModal(page) {
       await page.evaluate(() => {
         const overlay = document.querySelector('.fade.hui-modal.feedback-overlay.modal.show');
         if (overlay) {
-          log(`remove feedback-overlay modal`);
+          // log(`remove feedback-overlay modal`);
           overlay.style.display = 'none';
         }
 
         const backdrop = document.querySelector('.modal-backdrop');
         if (backdrop) {
-          log(`remove modal-backdrop modal`);
+          // log(`remove modal-backdrop modal`);
           backdrop.style.display = 'none';
         }
 
