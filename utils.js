@@ -725,9 +725,12 @@ async function handlePreviewLoadingErrorModal(page) {
     try {
       // Wait for modal using multiple potential selectors
       // We check for visibility by ensuring offsetWidth > 0 or class 'show' is present
+      const currentUrl = page.url();
+      // console.log(url);
+      log(`detecting feedback overlay modal in page ${currentUrl}`);
       await page.waitForFunction(() => {
-        const el = document.querySelector('.feedback-overlay');
-        if (el) log('feedback overlay modal detected');
+
+        const el = document.querySelector('.fade.hui-modal.feedback-overlay.modal.show');
         return el && (el.offsetWidth > 0 || el.offsetHeight > 0 || window.getComputedStyle(el).display !== 'none');
       }, { timeout: 8000 });
 
@@ -739,7 +742,7 @@ async function handlePreviewLoadingErrorModal(page) {
       log(`detected feedback overlay modal fail - after delay 1000`);
 
       await page.evaluate(() => {
-        const overlay = document.querySelector('.feedback-overlay');
+        const overlay = document.querySelector('.fade.hui-modal.feedback-overlay.modal.show');
         if (overlay) {
           log(`remove feedback-overlay modal`);
           overlay.style.display = 'none';
@@ -772,10 +775,10 @@ async function handleNewFeatureModal(page) {
       // Wait for modal using multiple potential selectors
       // We check for visibility by ensuring offsetWidth > 0 or class 'show' is present
       await page.waitForFunction(() => {
-        
+
         const el = document.querySelector('[da-id="new-feature-modal"]') ||
           document.querySelector('.new-feature-modal.modal.show');
-     
+
         return el && (el.offsetWidth > 0 || el.offsetHeight > 0 || window.getComputedStyle(el).display !== 'none');
       }, { timeout: 10000 });
 
