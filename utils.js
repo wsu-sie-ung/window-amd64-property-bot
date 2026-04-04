@@ -700,10 +700,10 @@ async function handleConfirmPostWithCreditModal(page) {
       await page.evaluate(() => {
         // const continueBtn = document.querySelector('[da-id="new-feature-modal-continue-button"]');
         continueBtn = null
+        // 
+        const button = document.querySelector('.gap-2.hui-modal-footer.modal-footer .hui-button.flex-grow-1.btn.btn-primary.btn-lg');
 
-        const buttons = document.querySelectorAll('.hui-button.flex-grow-1.btn.btn-primary.btn-lg');
-
-        const submitBtn = buttons[1]; // second button (0-based index)
+        const submitBtn = button; // second button (0-based index)
 
         if (submitBtn) {
           submitBtn.click();
