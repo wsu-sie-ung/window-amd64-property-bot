@@ -687,7 +687,7 @@ async function handleConfirmPostWithCreditModal(page) {
         // modal-dialog modal-sm modal-dialog-centered
 
         return el && (el.offsetWidth > 0 || el.offsetHeight > 0 || window.getComputedStyle(el).display !== 'none');
-      }, { timeout: 8000 });
+      }, { timeout: 10000 });
 
       log('Confirm Post with credit modal detected');
 
