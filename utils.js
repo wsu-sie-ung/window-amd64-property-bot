@@ -731,10 +731,12 @@ async function handlePreviewLoadingErrorModal(page) {
         return el && (el.offsetWidth > 0 || el.offsetHeight > 0 || window.getComputedStyle(el).display !== 'none');
       }, { timeout: 8000 });
 
-
+      log(`detected feedback overlay modal fail`);
 
       // Give it a split second to render buttons
       await delay(1000);
+
+      log(`detected feedback overlay modal fail - after delay 1000`);
 
       await page.evaluate(() => {
         const overlay = document.querySelector('.feedback-overlay');
@@ -760,7 +762,7 @@ async function handlePreviewLoadingErrorModal(page) {
       }, { timeout: 3000 }).catch(() => { });
 
     } catch (e) {
-      log('feedback overlay modal');
+      log(`detect feedback overlay modal fail ${e}`);
     }
   });
 }
