@@ -699,7 +699,7 @@ async function handleConfirmPostWithCreditModal(page) {
         continueBtn = null
 
         const closeBtn = document.querySelector('.hui-button.btn-round.hui-btn-close.btn.btn-icon');
-        
+
         if (continueBtn) {
           continueBtn.click();
           console.log('Clicked "Got it" button');
@@ -941,19 +941,27 @@ const uncheckIProp = async (page) => {
 
 
 const clickPostNow = async (page) => {
-  const postNowSelector = 'button[da-id="footer-post-now-button"]';
-  await page.waitForSelector(postNowSelector, { visible: true, timeout: 10000 });
-  await page.evaluate(selector => {
-    const btn = document.querySelector(selector);
-    if (btn) {
-      console.log('"Post now" button clicked via evaluate');
-      btn.scrollIntoView({ block: 'center' });
-      btn.click();
-    }
-    else {
-      console.log('No "Post now" button');
-    }
-  }, postNowSelector);
+  // footer-post-now-button
+  try {
+
+    const postNowSelector = 'button[da-id="footer-post-now-button"]';
+    await page.waitForSelector(postNowSelector, { visible: true, timeout: 10000 });
+    await page.evaluate(selector => {
+      const btn = document.querySelector(selector);
+      if (btn) {
+        console.log('"Post now" button clicked via evaluate');
+        btn.scrollIntoView({ block: 'center' });
+        btn.click();
+      }
+      else {
+        console.log('No "Post now" button');
+      }
+    }, postNowSelector);
+
+  } catch (e) {
+      log(`post btn step failed because of error : ${e}`);
+  }
+
 
 }
 
