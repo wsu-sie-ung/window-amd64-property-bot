@@ -684,6 +684,9 @@ async function handleConfirmPostWithCreditModal(page) {
       await page.waitForFunction(() => {
         // fade hui-modal modal show
         const el = document.querySelector('.fade.hui-modal.modal.show')
+
+        // const el = document.querySelector('.gap-2.hui-modal-footer.modal-footer [da-id="hive-button"]')
+
         // modal-dialog modal-sm modal-dialog-centered
 
         return el && (el.offsetWidth > 0 || el.offsetHeight > 0 || window.getComputedStyle(el).display !== 'none');
@@ -702,23 +705,29 @@ async function handleConfirmPostWithCreditModal(page) {
 
         if (continueBtn) {
           continueBtn.click();
-          console.log('Clicked "Got it" button');
+          console.log('confitm modal Clicked "Got it" button');
         } else if (closeBtn) {
           closeBtn.click();
-          console.log('Clicked close button');
+          console.log('confirm buttn Clicked close button');
         } else {
 
         }
       });
 
       // Wait for modal to disappear
-      await page.waitForFunction(() => {
-        const el = document.querySelector('[da-id="hive-modal"]');
-        return !el || el.offsetParent === null;
-      }, { timeout: 3000 }).catch(() => { });
+      try {
+        await page.waitForFunction(() => {
+          const el = document.querySelector('.fade.hui-modal.modal.show');
+          return !el || el.offsetParent === null;
+        }, { timeout: 3000 }).catch(() => { });
+      }
+      catch (e) {
+        log(`Confirm box detected but can not be dissmiss -> ${e}`);
+      }
+
 
     } catch (e) {
-      log(`No confirn post with credit modal appeared (or timed out waiting for it) -> ${e}`);
+      log(`No confirm post with credit modal appeared (or timed out waiting for it) -> ${e}`);
     }
   });
 }
@@ -746,13 +755,13 @@ async function handlePreviewLoadingErrorModal(page) {
       await page.evaluate(() => {
         const overlay = document.querySelector('.fade.hui-modal.feedback-overlay.modal.show');
         if (overlay) {
-          // log(`remove feedback-overlay modal`);
+          console.log(`remove feedback-overlay modal`);
           overlay.style.display = 'none';
         }
 
         const backdrop = document.querySelector('.modal-backdrop');
         if (backdrop) {
-          // log(`remove modal-backdrop modal`);
+          console.log(`remove modal-backdrop modal`);
           backdrop.style.display = 'none';
         }
 
@@ -959,7 +968,7 @@ const clickPostNow = async (page) => {
     }, postNowSelector);
 
   } catch (e) {
-      log(`post btn step failed because of error : ${e}`);
+    log(`post btn step failed because of error : ${e}`);
   }
 
 
