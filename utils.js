@@ -496,6 +496,26 @@ async function setBuiltUpSize(page, unitInfo) {
   console.log(`Set built-up size to: ${sqftInt}`);
 }
 
+//set builtup sqft
+async function setLandArea(page, unitInfo) {
+  if (!unitInfo.land_area) {
+    console.warn("No Land Area for this unix");
+    return;
+  }
+
+  const selector = 'input#landArea';
+  await page.waitForSelector(selector, { visible: true, timeout: 5000 });
+
+  // Convert remove decimal part
+  const landAreaInt = Math.floor(Number(unitInfo.land_area));
+
+
+  // Type the value from unitInfo.sqft
+  await page.type(selector, String(landAreaInt), { delay: 100 });
+
+  console.log(`Set land Area size to: ${landAreaInt}`);
+}
+
 // parking button
 async function setParking(page, unitInfo) {
   const rawParking = unitInfo.parking_spot;
@@ -930,6 +950,43 @@ const clickNextButton = async (page) => {
     await page.click(nextSelector);
     log("Clicked Next button");
   });
+}
+
+const checkIProp = async (page) => {
+  const ippCheckboxSelector = 'label[da-id="ipp-posting-plan-card"] input[type="checkbox"]';
+  await page.waitForSelector(ippCheckboxSelector, { visible: true });
+  const isChecked = await page.$eval(ippCheckboxSelector, el => el.checked);
+  if (isChecked) {
+
+    console.log("iProperty posting plan already checked");
+  } else {
+    await page.click(ippCheckboxSelector);
+    console.log("checked iProperty posting plan");
+  }
+}
+
+const checkPropertyGuru = async (page) => {
+  const pgCheckboxSelector = 'label[da-id="pg-posting-plan-card"] input[type="checkbox"]';
+  await page.waitForSelector(pgCheckboxSelector, { visible: true });
+  const isChecked = await page.$eval(pgCheckboxSelector, el => el.checked);
+  if (isChecked) {
+    console.log("PG posting plan already checked");
+  } else {
+    await page.click(ippCheckboxSelector);
+    console.log("checked PG posting plan");
+  }
+}
+
+const uncheckPropertyGuru = async (page) => {
+  const pgCheckboxSelector = 'label[da-id="pg-posting-plan-card"] input[type="checkbox"]';
+  await page.waitForSelector(pgCheckboxSelector, { visible: true });
+  const isChecked = await page.$eval(pgCheckboxSelector, el => el.checked);
+  if (isChecked) {
+    await page.click(pgCheckboxSelector);
+    console.log("Unchecked PG posting plan");
+  } else {
+    console.log("PG posting plan already unchecked");
+  }
 }
 
 const uncheckIProp = async (page) => {

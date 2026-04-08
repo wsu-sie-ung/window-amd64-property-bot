@@ -198,6 +198,8 @@ const runBot = async (options = {}) => {
       await utils.fillRooms(page, options.unitInfo);
       await utils.randomMouseMove(page);
       await utils.setBuiltUpSize(page, options.unitInfo);
+      // todo: fill landArea
+      await utils.setLandArea(page, options.unitInfo);
       await utils.setParking(page, options.unitInfo);
       await utils.setFurnishingStatus(page, options.unitInfo);
     }
