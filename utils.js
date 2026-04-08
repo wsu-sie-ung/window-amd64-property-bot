@@ -1050,6 +1050,7 @@ module.exports = {
   selectUnitType,
   selectDirection,
   setBuiltUpSize,
+  setLandArea,
   setParking,
   setFurnishingStatus,
   setRentalPrice,
