@@ -230,7 +230,13 @@ const runBot = async (options = {}) => {
     await utils.clickNextButton(page);
     await utils.handleNewFeatureModal(page);
 
+    // Reset PropertyGuru/IProperty Check box first
+    await utils.uncheckPropertyGuru(page);
     await utils.uncheckIProp(page);
+
+    // here decide if this listing post to pg or iprop
+    await utils.checkIProp(page);
+
     await utils.clickNextButton(page);
     // await utils.handleNewFeatureModal(page);
     await utils.handlePreviewLoadingErrorModal(page);
