@@ -796,6 +796,48 @@ async function handlePreviewLoadingErrorModal(page) {
     }
   });
 }
+
+async function closeDuplicatedImageAlert(page) {
+  await runStep("Handle Duplicate Image detect alert", async () => {
+    try {
+      
+      // Wait for modal using multiple potential selectors
+      // We check for visibility by ensuring offsetWidth > 0 or class 'show' is present
+      await page.waitForFunction(() => {
+
+        const el = document.querySelector('button.hui-button.flex-grow-1.btn.btn-primary.btn-lg')
+
+        return el && (el.offsetWidth > 0 || el.offsetHeight > 0 || window.getComputedStyle(el).display !== 'none');
+      }, { timeout: 10000 });
+
+      log('duplicate images detected');
+
+      // Give it a split second to render buttons
+      await delay(1000);
+
+      await page.evaluate(() => {
+        // new-feature-modal-continue-button
+        const continueBtn = document.querySelector('button.hui-button.flex-grow-1.btn.btn-primary.btn-lg');
+        // modal-close-button
+        // const closeBtn = document.querySelector('[da-id="modal-close-button"]');
+
+        if (continueBtn) {
+          continueBtn.click();
+          console.log('Clicked "Got it" button');
+        } 
+      });
+
+      // Wait for modal to disappear
+      await page.waitForFunction(() => {
+        const el = document.querySelector('.modal-dialog.modal-sm.modal-dialog-centered')
+        return !el || el.offsetParent === null;
+      }, { timeout: 3000 }).catch(() => { });
+
+    } catch (e) {
+      log(`no Duplicate image detected : ${e}`);
+    }
+  });
+}
 // Handle "New Feature" modal (auto-tagging etc)
 async function handleNewFeatureModal(page) {
   await runStep("Handle New Feature Modal", async () => {
@@ -850,6 +892,8 @@ async function handleNewFeatureModal(page) {
     }
   });
 }
+
+
 
 // Upload images from subsale_contents
 async function uploadImages(page, unitInfo) {
@@ -931,9 +975,7 @@ async function uploadImages(page, unitInfo) {
         // 
         await delay(5000);
 
-        const closeBtnSelector = 'button.hui-button.btn-round.hui-btn-close.btn.btn-icon';
-        await page.waitForSelector(closeBtnSelector, { visible: true, timeout: 10000 });
-        await page.click(closeBtnSelector);
+
       } catch (e) {
         console.error("Error during file upload:", e);
       }
@@ -1064,6 +1106,7 @@ module.exports = {
   handlePreviewLoadingErrorModal,
   handleConfirmPostWithCreditModal,
   handleNewFeatureModal,
+  closeDuplicatedImageAlert,
   uploadImages,
   clickNextButton,
   uncheckPropertyGuru,

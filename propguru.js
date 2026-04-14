@@ -237,6 +237,7 @@ const runBot = async (options = {}) => {
 
     // here decide if this listing post to pg or iprop
     await utils.checkIProp(page);
+    await utils.closeDuplicatedImageAlert(page);
 
     await utils.clickNextButton(page);
     // await utils.handleNewFeatureModal(page);
