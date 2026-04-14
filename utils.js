@@ -1068,6 +1068,7 @@ module.exports = {
   clickNextButton,
   uncheckPropertyGuru,
   uncheckIProp,
+  checkIProp,
   clickPostNow,
   performLogin,
   clickSkipModal,
