@@ -929,10 +929,11 @@ async function uploadImages(page, unitInfo) {
 
         // Wait for upload to likely complete
         // 
+        await delay(5000);
+
         const closeBtnSelector = 'button.hui-button.btn-round.hui-btn-close.btn.btn-icon';
         await page.waitForSelector(closeBtnSelector, { visible: true, timeout: 10000 });
         await page.click(closeBtnSelector);
-        await delay(5000);
       } catch (e) {
         console.error("Error during file upload:", e);
       }
