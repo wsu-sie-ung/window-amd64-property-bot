@@ -1061,6 +1061,7 @@ module.exports = {
   handleNewFeatureModal,
   uploadImages,
   clickNextButton,
+  uncheckPropertyGuru,
   uncheckIProp,
   clickPostNow,
   performLogin,
