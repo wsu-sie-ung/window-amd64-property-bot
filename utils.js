@@ -1110,6 +1110,7 @@ module.exports = {
   uploadImages,
   clickNextButton,
   uncheckPropertyGuru,
+  checkPropertyGuru,
   uncheckIProp,
   checkIProp,
   clickPostNow,

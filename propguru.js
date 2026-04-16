@@ -236,7 +236,13 @@ const runBot = async (options = {}) => {
     
 
     // here decide if this listing post to pg or iprop
-    await utils.checkIProp(page);
+    if(options.post_to_propertyguru) {
+      await utils.checkPropertyGuru(page);
+    }
+    if(options.post_to_iproperty) {
+      await utils.checkIProp(page);  
+    }
+    
     await utils.closeDuplicatedImageAlert(page);
 
     await utils.clickNextButton(page);
@@ -246,7 +252,8 @@ const runBot = async (options = {}) => {
 
     await utils.clickPostNow(page);
 
-    await utils.handleConfirmPostWithCreditModal(page);
+    // disable the real posting when doing demo
+    // await utils.handleConfirmPostWithCreditModal(page);
 
     const confirmModalSelector = ".modal-dialog.modal-sm.modal-dialog-centered";
     await page.waitForSelector(confirmModalSelector, { visible: true, timeout: 10000 });

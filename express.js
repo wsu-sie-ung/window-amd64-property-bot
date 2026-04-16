@@ -33,6 +33,8 @@ app.post('/api/v1/job', async (req, res) => {
   const platform = body.platform;             // required: "iproperty" | "propertyguru"
   const browserProfilePath = body.browserProfilePath || '';
   const ip = body.ip || '';
+  const post_to_propertyguru = body.post_to_propertyguru;
+  const post_to_iproperty = body.post_to_iproperty;
   const timeout = body.timeout || 60000;      // max execution time (ms)
 
   //API debugging 
@@ -68,7 +70,9 @@ app.post('/api/v1/job', async (req, res) => {
       ip,
       timeout,
       email: agentEmail,
-      password: agentPassword
+      password: agentPassword, 
+      post_to_propertyguru,
+      post_to_iproperty
     })
 
     // If result is undefined, it means the bot failed and swallowed the error
