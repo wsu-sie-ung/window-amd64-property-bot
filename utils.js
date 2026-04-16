@@ -1000,6 +1000,7 @@ const clickNextButton = async (page) => {
 }
 
 const checkIProp = async (page) => {
+  console.log("trying to check iproperty");
   const ippCheckboxSelector = 'label[da-id="ipp-posting-plan-card"] input[type="checkbox"]';
   await page.waitForSelector(ippCheckboxSelector, { visible: true });
   const isChecked = await page.$eval(ippCheckboxSelector, el => el.checked);
@@ -1012,7 +1013,20 @@ const checkIProp = async (page) => {
   }
 }
 
+const uncheckIProp = async (page) => {
+  const ippCheckboxSelector = 'label[da-id="ipp-posting-plan-card"] input[type="checkbox"]';
+  await page.waitForSelector(ippCheckboxSelector, { visible: true });
+  const isChecked = await page.$eval(ippCheckboxSelector, el => el.checked);
+  if (isChecked) {
+    await page.click(ippCheckboxSelector);
+    console.log("Unchecked iProperty posting plan");
+  } else {
+    console.log("iProperty posting plan already unchecked");
+  }
+}
+
 const checkPropertyGuru = async (page) => {
+  console.log("trying to check propertyguru");
   const pgCheckboxSelector = 'label[da-id="pg-posting-plan-card"] input[type="checkbox"]';
   await page.waitForSelector(pgCheckboxSelector, { visible: true });
   const isChecked = await page.$eval(pgCheckboxSelector, el => el.checked);
@@ -1036,17 +1050,7 @@ const uncheckPropertyGuru = async (page) => {
   }
 }
 
-const uncheckIProp = async (page) => {
-  const ippCheckboxSelector = 'label[da-id="ipp-posting-plan-card"] input[type="checkbox"]';
-  await page.waitForSelector(ippCheckboxSelector, { visible: true });
-  const isChecked = await page.$eval(ippCheckboxSelector, el => el.checked);
-  if (isChecked) {
-    await page.click(ippCheckboxSelector);
-    console.log("Unchecked iProperty posting plan");
-  } else {
-    console.log("iProperty posting plan already unchecked");
-  }
-}
+
 
 
 
