@@ -1033,7 +1033,7 @@ const checkPropertyGuru = async (page) => {
   if (isChecked) {
     console.log("PG posting plan already checked");
   } else {
-    await page.click(ippCheckboxSelector);
+    await page.click(pgCheckboxSelector);
     console.log("checked PG posting plan");
   }
 }
