@@ -504,7 +504,13 @@ async function setLandArea(page, unitInfo) {
   }
 
   const selector = 'input#landArea';
-  await page.waitForSelector(selector, { visible: true, timeout: 5000 });
+  try {
+    await page.waitForSelector(selector, { visible: true, timeout: 5000 });
+  }
+  catch (e) {
+    console.log(`no land_area found: ${e}`);
+    return;
+  }
 
   // Convert remove decimal part
   const landAreaInt = Math.floor(Number(unitInfo.land_area));
@@ -800,7 +806,7 @@ async function handlePreviewLoadingErrorModal(page) {
 async function closeDuplicatedImageAlert(page) {
   await runStep("Handle Duplicate Image detect alert", async () => {
     try {
-      
+
       // Wait for modal using multiple potential selectors
       // We check for visibility by ensuring offsetWidth > 0 or class 'show' is present
       await page.waitForFunction(() => {
@@ -824,7 +830,7 @@ async function closeDuplicatedImageAlert(page) {
         if (continueBtn) {
           continueBtn.click();
           console.log('Clicked "Got it" button');
-        } 
+        }
       });
 
       // Wait for modal to disappear
