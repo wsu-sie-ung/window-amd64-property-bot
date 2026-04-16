@@ -27,6 +27,9 @@ const runBot = async (options = {}) => {
   fs.mkdirSync(userDataDir, { recursive: true });
   utils.log("Using userDataDir:", userDataDir);
 
+  utils.log(`should post to property guru ${options.post_to_propertyguru}`); 
+  utils.log(`should post to iproperty ${options.post_to_iproperty}`); 
+
   let launchArgs = [
     "--no-first-run",
     "--no-default-browser-check",
