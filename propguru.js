@@ -262,18 +262,18 @@ const runBot = async (options = {}) => {
     await page.waitForSelector(confirmModalSelector, { visible: true, timeout: 10000 });
     console.log("Confirm posting modal appeared");
 
-    // const confirmBtnSelector = `${confirmModalSelector} button.btn-primary`;
+    const confirmBtnSelector = `${confirmModalSelector} button.btn-primary`;
 
-    // await page.waitForSelector(confirmBtnSelector, { visible: true, timeout: 5000 });
-    // await page.evaluate(selector => {
-    //   const btn = document.querySelector(selector);
-    //   if (btn) {
-    //     btn.scrollIntoView({ block: 'center' });
-    //     btn.click();
-    //   }
-    // }, confirmBtnSelector);
+    await page.waitForSelector(confirmBtnSelector, { visible: true, timeout: 5000 });
+    await page.evaluate(selector => {
+      const btn = document.querySelector(selector);
+      if (btn) {
+        btn.scrollIntoView({ block: 'center' });
+        btn.click();
+      }
+    }, confirmBtnSelector);
 
-    // console.log('"Confirm" button clicked');
+    console.log('"Confirm" button clicked');
 
 
 
