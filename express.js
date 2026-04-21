@@ -25,11 +25,11 @@ app.post('/api/v1/job', async (req, res) => {
   // values that client provides (request body)
   const body = req.body || {};
 
-  const jobId = body.jobId;                   
-  const agentId = body.agentId;               
+  const jobId = body.jobId;
+  const agentId = body.agentId;
   const agentEmail = body.email;
   const agentPassword = body.password;
-  const unitInfo = body.unitInfo || {};       
+  const unitInfo = body.unitInfo || {};
   const platform = body.platform;             // required: "iproperty" | "propertyguru"
   const browserProfilePath = body.browserProfilePath || '';
   const ip = body.ip || '';
@@ -43,6 +43,17 @@ app.post('/api/v1/job', async (req, res) => {
   if (!platform) missingFields.push("platform")
   if (!agentId) missingFields.push("agentId")
 
+  const allowedAgents = [17, 54, 107, 312, 313, 403, 534, 921, 1115, 1154, 1528, 1581, 7455];
+
+  const id = Number(agentId);
+
+  if (!Number.isInteger(id) || !allowedAgents.includes(id)) {
+    return res.status(403).json({
+      error: 'Agent not whitelisted',
+      agentId: id
+    });
+  }
+
   if (missingFields.length) {
     return res.status(400).json({ error: `Missing required fields: ${missingFields.join(", ")}` })
   }
@@ -51,7 +62,7 @@ app.post('/api/v1/job', async (req, res) => {
     return res.status(400).json({
       error: 'agentId must be a string'
     });
-  } 
+  }
 
   const runBot = botMap[platform]
   if (!runBot) {
@@ -70,7 +81,7 @@ app.post('/api/v1/job', async (req, res) => {
       ip,
       timeout,
       email: agentEmail,
-      password: agentPassword, 
+      password: agentPassword,
       post_to_propertyguru,
       post_to_iproperty
     })
