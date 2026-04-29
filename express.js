@@ -115,6 +115,7 @@ app.post('/api/v1/job', async (req, res) => {
 // const PORT = process.env.PORT || 3002;
 const PORT = process.env.PORT || 3000;
 // app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+// change address to 0.0.0.0. to ensure public accessible
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
 });
