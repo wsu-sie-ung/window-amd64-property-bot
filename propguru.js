@@ -65,9 +65,9 @@ const runBot = async (options = {}) => {
   puppeteer.use(
     UserPrefsPlugin({
       userPrefs: {
-        credentials_enable_service: false,   // ❌ disable save password
+        credentials_enable_service: false,   // disable save password
         profile: {
-          password_manager_enabled: false,   // ❌ disable password manager
+          password_manager_enabled: false,   // disable password manager
         },
       },
     })
@@ -275,10 +275,8 @@ const runBot = async (options = {}) => {
 
     console.log('"Confirm" button clicked');
 
-
-
-
     utils.log("All buttons clicked. Task complete.");
+    await browser.close();
     return { success: true, captchaDetected: false };
   } catch (err) {
     console.error(
