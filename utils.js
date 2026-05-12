@@ -1231,6 +1231,12 @@ async function clickSkipModal(page) {
 async function clickCreateListing(page) {
   const targetSelector = "#dashboard > div.jss10.jss3 > div > div:nth-child(2) > div.jss34 > div > span > a"
   const button = await runStep("Wait for target button", async () => page.waitForSelector(targetSelector, { timeout: 30000 }))
+
+
+  const tagName = await button.evaluate(el => el.tagName);
+  // console.log();
+  log(`Button tag name:", ${tagName}`);
+
   log(`x log 10 : found create listing button`);
   await runStep("Click Create Listing button", async () => {
     log(`x log 10-1 : try to click create listing button`);
