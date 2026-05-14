@@ -231,6 +231,7 @@ const runBot = async (options = {}) => {
     await utils.delay(10000);
 
     await utils.clickNextButton(page);
+    await utils.closeDuplicatedImageAlert(page);
     await utils.handleNewFeatureModal(page);
 
     // Reset PropertyGuru/IProperty Check box first
