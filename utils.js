@@ -816,7 +816,7 @@ async function closeDuplicatedImageAlert(page) {
         return el && (el.offsetWidth > 0 || el.offsetHeight > 0 || window.getComputedStyle(el).display !== 'none');
       }, { timeout: 10000 });
 
-      log('duplicate images detected');
+      log('duplicate images detected or images suspended detected');
 
       // Give it a split second to render buttons
       await delay(1000);
@@ -829,7 +829,7 @@ async function closeDuplicatedImageAlert(page) {
 
         if (continueBtn) {
           continueBtn.click();
-          console.log('Clicked "Got it" button');
+          console.log('Clicked "Got it" or "continue" button');
         }
       });
 
@@ -844,6 +844,50 @@ async function closeDuplicatedImageAlert(page) {
     }
   });
 }
+
+
+// modal-dialog modal-sm modal-dialog-centered
+// handle photo suspended message or other alert message modal box
+// deprecated
+async function handleNewAlertMessageModal(page) {
+  await runStep("Handle alert Message Modal", async () => {
+    try {
+      // Wait for modal using multiple potential selectors
+      // We check for visibility by ensuring offsetWidth > 0 or class 'show' is present
+      await page.waitForFunction(() => {
+
+        const el = document.querySelector('.modal-dialog.modal-sm.modal-dialog-centered');
+
+        return el && (el.offsetWidth > 0 || el.offsetHeight > 0 || window.getComputedStyle(el).display !== 'none');
+      }, { timeout: 10000 });
+
+      log('Alert message model detected (example: photos suspended)');
+
+      // Give it a split second to render buttons
+      await delay(1000);
+
+      await page.evaluate(() => {
+        // new-feature-modal-continue-button
+        const continueBtn = document.querySelector('.hui-button.flex-grow-1.btn.btn-primary.btn-lg');
+
+        if (continueBtn) {
+          continueBtn.click();
+          console.log('Clicked "Got it" button');
+        } 
+      });
+
+      // Wait for modal to disappear
+      await page.waitForFunction(() => {
+        const el = document.querySelector('.modal-dialog.modal-sm.modal-dialog-centered');
+        return !el || el.offsetParent === null;
+      }, { timeout: 3000 }).catch(() => { });
+
+    } catch (e) {
+      log(`try to press continue btn when alert message modal appear : ${e}`);
+    }
+  });
+}
+
 // Handle "New Feature" modal (auto-tagging etc)
 async function handleNewFeatureModal(page) {
   await runStep("Handle New Feature Modal", async () => {
@@ -1116,6 +1160,7 @@ module.exports = {
   handlePreviewLoadingErrorModal,
   handleConfirmPostWithCreditModal,
   handleNewFeatureModal,
+  // handleNewAlertMessageModal,
   closeDuplicatedImageAlert,
   uploadImages,
   clickNextButton,
