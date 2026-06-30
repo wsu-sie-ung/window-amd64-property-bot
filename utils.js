@@ -1046,6 +1046,21 @@ const clickNextButton = async (page) => {
     await page.waitForSelector(nextSelector, { visible: true, timeout: 10000 });
     await page.click(nextSelector);
     log("Clicked Next button");
+
+    // Wait briefly for validation to render
+    await new Promise((res) => setTimeout(res, 800));
+
+    // Check for field validation errors
+    const validationErrors = await page.evaluate(() => {
+      const errorEls = document.querySelectorAll('[da-id="hive-fieldhelptext"].color--error');
+      return Array.from(errorEls)
+        .map((el) => el.textContent.trim())
+        .filter(Boolean);
+    });
+
+    if (validationErrors.length > 0) {
+      throw new Error(`Form validation failed: ${validationErrors.join("; ")}`);
+    }
   });
 }
 

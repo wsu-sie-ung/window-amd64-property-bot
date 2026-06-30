@@ -291,7 +291,7 @@ const runBot = async (options = {}) => {
     try {
       if (browser) {
         await new Promise((res) => setTimeout(res, 1500));
-        // await browser.close();
+        await browser.close();
       }
     } catch (_) { }
   }
