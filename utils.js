@@ -696,7 +696,14 @@ async function setPropertyDescription(page, unitInfo) {
   const selector = 'textarea#description';
   await page.waitForSelector(selector, { visible: true, timeout: 5000 });
 
-  await page.type(selector, descRow.description, { delay: 25 });
+  // await page.type(selector, descRow.description, { delay: 25 });
+
+  await page.evaluate((sel, value) => {
+    const el = document.querySelector(sel);
+    el.value = value;
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+  }, selector, descRow.description);
 
   console.log('Property description filled');
 }
@@ -873,7 +880,7 @@ async function handleNewAlertMessageModal(page) {
         if (continueBtn) {
           continueBtn.click();
           console.log('Clicked "Got it" button');
-        } 
+        }
       });
 
       // Wait for modal to disappear
