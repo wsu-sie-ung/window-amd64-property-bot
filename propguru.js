@@ -114,7 +114,9 @@ const runBot = async (options = {}) => {
       const maxRetries = 3;
       for (let i = 0; i < maxRetries; i++) {
         try {
-          await page.goto("https://agentnet.propertyguru.com.my/v2/dash", {
+          
+          // https://agentnet.propertyguru.com.my/v2/dash
+          await page.goto("https://agentnet.propertyguru.com.my/v3/create-listing", {
             waitUntil: ["domcontentloaded", "networkidle2"],
           });
           return;
@@ -147,7 +149,7 @@ const runBot = async (options = {}) => {
     await utils.clickSkipModal(page)
 
     // CREATE LISTING
-    await utils.clickCreateListing(page);
+    // await utils.clickCreateListing(page);
 
     if (!options.unitInfo) throw new Error("unitInfo missing from options payload");
 

@@ -1237,12 +1237,14 @@ async function performLogin(page, options, requestedAgentId) {
 
   await runStep("Wait for Auth Redirect", async () => {
     try {
+      
       await page.waitForFunction(
         () => window.location.href.includes("agentnet.propertyguru.com.my"),
         { timeout: 60000, polling: 1000 }
       )
     } catch (_) {
-      await page.goto("https://agentnet.propertyguru.com.my/v2/dash", { waitUntil: ["domcontentloaded", "networkidle2"] })
+      // https://agentnet.propertyguru.com.my/v2/dash
+      await page.goto("https://agentnet.propertyguru.com.my/v3/create-listing", { waitUntil: ["domcontentloaded", "networkidle2"] })
     }
   })
 }
