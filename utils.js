@@ -907,7 +907,7 @@ async function handleNewFeatureModal(page) {
           document.querySelector('.new-feature-modal.modal.show');
 
         return el && (el.offsetWidth > 0 || el.offsetHeight > 0 || window.getComputedStyle(el).display !== 'none');
-      }, { timeout: 1000 });
+      }, { timeout: 10000 });
 
       log('New feature modal detected');
 
@@ -1017,7 +1017,7 @@ async function uploadImages(page, unitInfo) {
     if (filesToUpload.length > 0) {
       try {
         const uploadBtnSelector = 'button[da-id="upload-images-card"]';
-        await page.waitForSelector(uploadBtnSelector, { visible: true, timeout: 10000 });
+        await page.waitForSelector(uploadBtnSelector, { visible: true, timeout: 1000 });
 
         console.log("Clicking upload button and waiting for file chooser...");
         const [fileChooser] = await Promise.all([
