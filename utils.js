@@ -1251,7 +1251,7 @@ async function clickSkipModal(page) {
 
   try {
     button = await runStep("Wait for skip modal button", async () =>
-      page.waitForSelector(targetSelector, { timeout: 30000 })
+      page.waitForSelector(targetSelector, { timeout: 3000 })
     );
   } catch (err) {
     log("x log 9 : skip modal not found, nothing to do");
@@ -1289,8 +1289,8 @@ async function clickSkipModal(page) {
 
 // Click Create Listing
 async function clickCreateListing(page) {
-  const targetSelector = "#dashboard > div.jss10.jss3 > div > div:nth-child(2) > div.jss34 > div > span > a"
-  const button = await runStep("Wait for target button", async () => page.waitForSelector(targetSelector, { timeout: 30000 }))
+  const targetSelector = "#dashboard > div.jss10.jss3 > div > div:nth-child(2) > div.jss34 > div > a"
+  const button = await runStep("Wait for target button", async () => page.waitForSelector(targetSelector, { timeout: 3000 }))
 
 
   const tagName = await button.evaluate(el => el.tagName);

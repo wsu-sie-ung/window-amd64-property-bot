@@ -47,12 +47,12 @@ app.post('/api/v1/job', async (req, res) => {
 
   const id = Number(agentId);
 
-  if (!Number.isInteger(id) || !allowedAgents.includes(id)) {
-    return res.status(403).json({
-      error: 'Agent not whitelisted',
-      agentId: id
-    });
-  }
+  // if (!Number.isInteger(id) || !allowedAgents.includes(id)) {
+  //   return res.status(403).json({
+  //     error: 'Agent not whitelisted',
+  //     agentId: id
+  //   });
+  // }
 
   if (missingFields.length) {
     return res.status(400).json({ error: `Missing required fields: ${missingFields.join(", ")}` })

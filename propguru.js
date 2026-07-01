@@ -16,6 +16,8 @@ const runBot = async (options = {}) => {
     process.env.AGENT_ID ||
     "default_agent";
 
+  console.log("Selected agent:", requestedAgentId)
+
   utils.log("Selected agent:", requestedAgentId);
 
   const projectRoot = __dirname;
@@ -165,7 +167,7 @@ const runBot = async (options = {}) => {
 
     await utils.selectImmediateDate(page);
     await utils.clickNextButton(page);
-    await utils.randomDelay(800, 1500);
+    await utils.randomDelay(500, 100);
 
     await utils.typePropertyName(page, options.unitInfo);
     await utils.randomMouseMove(page);
@@ -196,7 +198,7 @@ const runBot = async (options = {}) => {
       await utils.selectTitleType(page, options.unitInfo);
       await utils.selectDirection(page, options.unitInfo);
       await utils.clickNextButton(page);
-      await utils.randomDelay(1000, 2000);
+      await utils.randomDelay(500, 1000);
 
       await utils.fillRooms(page, options.unitInfo);
       await utils.randomMouseMove(page);
@@ -209,13 +211,13 @@ const runBot = async (options = {}) => {
 
     // COMMON STEPS
     await utils.clickNextButton(page);
-    await utils.randomDelay(1000, 2000);
+    await utils.randomDelay(500, 1000);
 
     await utils.setRentalPrice(page, options.unitInfo);
     await utils.randomMouseMove(page);
 
     await utils.clickNextButton(page);
-    await utils.randomDelay(1000, 2000);
+    await utils.randomDelay(500, 1000);
 
     await utils.setHeadline(page, options.unitInfo);
     await utils.randomDelay(500, 1000);
@@ -260,7 +262,7 @@ const runBot = async (options = {}) => {
     // await utils.handleConfirmPostWithCreditModal(page);
 
     const confirmModalSelector = ".modal-dialog.modal-sm.modal-dialog-centered";
-    await page.waitForSelector(confirmModalSelector, { visible: true, timeout: 10000 });
+    await page.waitForSelector(confirmModalSelector, { visible: true, timeout: 1000 });
     console.log("Confirm posting modal appeared");
 
     const confirmBtnSelector = `${confirmModalSelector} button.btn-primary`;
@@ -291,7 +293,7 @@ const runBot = async (options = {}) => {
     try {
       if (browser) {
         await new Promise((res) => setTimeout(res, 1500));
-        await browser.close();
+        // await browser.close();
       }
     } catch (_) { }
   }
