@@ -907,7 +907,7 @@ async function handleNewFeatureModal(page) {
           document.querySelector('.new-feature-modal.modal.show');
 
         return el && (el.offsetWidth > 0 || el.offsetHeight > 0 || window.getComputedStyle(el).display !== 'none');
-      }, { timeout: 10000 });
+      }, { timeout: 1000 });
 
       log('New feature modal detected');
 
