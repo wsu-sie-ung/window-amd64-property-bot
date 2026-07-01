@@ -279,7 +279,6 @@ const runBot = async (options = {}) => {
     console.log('"Confirm" button clicked');
 
     utils.log("All buttons clicked. Task complete.");
-    await browser.close();
     return { success: true, captchaDetected: false };
   } catch (err) {
     console.error(
@@ -293,7 +292,7 @@ const runBot = async (options = {}) => {
     try {
       if (browser) {
         await new Promise((res) => setTimeout(res, 1500));
-        // await browser.close();
+        await browser.close();
       }
     } catch (_) { }
   }
