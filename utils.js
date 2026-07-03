@@ -700,7 +700,7 @@ async function setPropertyDescription(page, unitInfo) {
 
   await page.evaluate((sel, value) => {
     const el = document.querySelector(sel);
-    el.value = value;
+    el.value = value.replace(/[\x00-\x09\x0B-\x1F\x7F]/g, '');
     el.dispatchEvent(new Event('input', { bubbles: true }));
     el.dispatchEvent(new Event('change', { bubbles: true }));
   }, selector, descRow.description);
