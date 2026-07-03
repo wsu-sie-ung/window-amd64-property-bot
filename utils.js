@@ -700,7 +700,11 @@ async function setPropertyDescription(page, unitInfo) {
 
   await page.evaluate((sel, value) => {
     const el = document.querySelector(sel);
-    el.value = value.replace(/[\x00-\x09\x0B-\x1F\x7F]/g, '');
+    const proto = el.tagName === 'TEXTAREA'
+      ? window.HTMLTextAreaElement.prototype
+      : window.HTMLInputElement.prototype;
+    const nativeSetter = Object.getOwnPropertyDescriptor(proto, 'value').set;
+    nativeSetter.call(el, value);
     el.dispatchEvent(new Event('input', { bubbles: true }));
     el.dispatchEvent(new Event('change', { bubbles: true }));
   }, selector, descRow.description);
@@ -1237,7 +1241,7 @@ async function performLogin(page, options, requestedAgentId) {
 
   await runStep("Wait for Auth Redirect", async () => {
     try {
-      
+
       await page.waitForFunction(
         () => window.location.href.includes("agentnet.propertyguru.com.my"),
         { timeout: 60000, polling: 1000 }
