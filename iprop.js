@@ -48,10 +48,22 @@ const runBot = async (options = {}) => {
   log("Launching browser with agent profile:", userDataDir)
 
 
-  const launchArgs = [
+  // const launchArgs = [
+  //   "--no-first-run",
+  //   "--no-default-browser-check",
+  //   "--disable-blink-features=AutomationControlled"
+  // ]
+
+   let launchArgs = [
     "--no-first-run",
     "--no-default-browser-check",
-    "--disable-blink-features=AutomationControlled"
+    "--disable-blink-features=AutomationControlled",
+    "--disable-features=PasswordLeakDetection,PasswordManager,PasswordImport,PasswordExport,PasswordGeneration,SafeBrowsing,SafeBrowsingDailySpywarePatternExtended,SafeBrowsingEnhancedProtection",
+    "--disable-client-side-phishing-detection",
+    "--disable-save-password-bubble",
+    "--password-store=basic",
+    "--use-mock-keychain",
+    "--disable-infobars"
   ]
 
   // Add sandbox flags if running on Linux (production)
