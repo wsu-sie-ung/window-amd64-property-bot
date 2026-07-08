@@ -3,7 +3,7 @@ const path = require("path")
 const puppeteer = require("puppeteer-extra");
 const StealthPlugin = require("puppeteer-extra-plugin-stealth");
 
-puppeteer.use(StealthPlugin()); 
+puppeteer.use(StealthPlugin());
 
 const {
   log,
@@ -63,7 +63,7 @@ const runBot = async (options = {}) => {
     launchArgs.push("--no-sandbox", "--disable-setuid-sandbox")
     // executablePath = "/usr/bin/google-chrome"
     executablePath = "/usr/bin/chromium-browser"
-    
+
   } else if (process.platform === "darwin") {
     executablePath = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
   }
@@ -74,6 +74,9 @@ const runBot = async (options = {}) => {
     // executablePath = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
     executablePath = "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe";
   }
+
+  utils.log(`use arguments: ${launchArgs}`);
+  utils.log(`use execution path : ${executablePath}`);
 
   let browser
   try {
@@ -88,7 +91,7 @@ const runBot = async (options = {}) => {
     const page = await browser.newPage()
     // Non-fatal: Log errors from the website's own scripts (don't stop bot)
     page.on("pageerror", err => console.warn(new Date().toISOString(), "PAGE JS ERROR (NON-FATAL)", err))
-    
+
     // Fatal: Page crashed. The next puppeteer action will automatically throw an error.
     page.on("error", err => console.error(new Date().toISOString(), "PAGE CRASHED", err))
     page.on("requestfailed", async req => {
@@ -100,7 +103,7 @@ const runBot = async (options = {}) => {
       if (/cdn-cgi\/challenge-platform/i.test(url)) {
         botChallengeDetected = true
         console.error(new Date().toISOString(), "BOT CHALLENGE DETECTED", url, failure)
-        try { await page.close() } catch (e) {} 
+        try { await page.close() } catch (e) { }
         return
       }
       throw new Error(`REQUEST FAILED: ${url} ${failure}`)
@@ -120,7 +123,7 @@ const runBot = async (options = {}) => {
         }
       }
     })
-    
+
     const captchaDetected = await runStep("Check CAPTCHA", async () => checkAndPauseIfCaptcha(page, false))
     if (captchaDetected) throw new Error("CAPTCHA detected")
 
@@ -128,7 +131,7 @@ const runBot = async (options = {}) => {
 
     if (needsLogin) {
       log("Login required for agent:", requestedAgentId)
-      
+
       const loginEmail = options.email || process.env.IPROP_EMAIL
       const loginPassword = options.password || process.env.IPROP_PASSWORD
 
@@ -141,7 +144,7 @@ const runBot = async (options = {}) => {
       await runStep("Type password", async () => page.type("#login-password", loginPassword, { delay: 200 }))
       await runStep("Submit login", async () =>
         Promise.all([
-          page.waitForNavigation({ waitUntil: ["domcontentloaded", "networkidle2"] }).catch(() => {}),
+          page.waitForNavigation({ waitUntil: ["domcontentloaded", "networkidle2"] }).catch(() => { }),
           page.click("#btn_login")
         ])
       )
@@ -149,7 +152,7 @@ const runBot = async (options = {}) => {
       await runStep("Navigate to /pro/listings post-login", async () =>
         page.goto("https://www.iproperty.com.my/pro/listings", { waitUntil: ["domcontentloaded", "networkidle2"] })
       )
-      
+
       const captchaDetected2 = await runStep("Check CAPTCHA post-login", async () => checkAndPauseIfCaptcha(page, false))
       if (captchaDetected2) throw new Error("CAPTCHA detected")
 
@@ -179,7 +182,7 @@ const runBot = async (options = {}) => {
         button.click()
       ])
     )
-    
+
     return { success: true, captchaDetected: false }
 
   } catch (err) {
@@ -188,7 +191,7 @@ const runBot = async (options = {}) => {
     const isCaptcha = (err && err.message && err.message.includes("CAPTCHA detected")) || botChallengeDetected
     return { success: false, captchaDetected: isCaptcha, error: err.message || String(err) }
   } finally {
-    try { if (browser) await browser.close() } catch (_) {}
+    try { if (browser) await browser.close() } catch (_) { }
   }
 }
 
