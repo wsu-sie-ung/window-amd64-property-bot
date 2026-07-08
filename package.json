@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "node express.js",
-    "start": "node express.js"
+    "start": "node express.js",
+    "warmup": "node warmup.js"
   },
   "keywords": [],
   "author": "",
