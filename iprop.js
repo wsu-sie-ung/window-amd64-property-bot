@@ -123,17 +123,54 @@ const runBot = async (options = {}) => {
     })
     log("New page created")
 
-    await runStep("Navigate to /pro/listings", async () => {
+    const HOME_URL = "https://www.iproperty.com.my/"
+    const LISTINGS_URL = "https://www.iproperty.com.my/pro/listings?lang=en-GB"
+
+    const gotoWithRetry = async (url, label) => {
       const maxRetries = 3;
       for (let i = 0; i < maxRetries; i++) {
         try {
-          await page.goto("https://www.iproperty.com.my/pro/listings?lang=en-GB", { waitUntil: ["domcontentloaded", "networkidle2"] });
+          await page.goto(url, { waitUntil: ["domcontentloaded", "networkidle2"] });
           return; // Success
         } catch (err) {
           if (i === maxRetries - 1) throw err; // Throw on last retry
-          log(`Navigation failed (attempt ${i + 1}/${maxRetries}): ${err.message}. Retrying in 2s...`);
+          log(`${label} failed (attempt ${i + 1}/${maxRetries}): ${err.message}. Retrying in 2s...`);
           await new Promise(res => setTimeout(res, 2000));
         }
+      }
+    }
+
+    await runStep("Navigate to home page", async () => gotoWithRetry(HOME_URL, "Home navigation"))
+
+    // Reach the PRO listings by clicking through the account menu on the home page
+    // instead of hitting the /pro/listings deep link directly — this looks like real
+    // navigation and lowers Cloudflare suspicion. Falls back to the direct URL if the
+    // account menu isn't available (e.g. the profile isn't logged in yet).
+    await runStep("Open account menu → iProperty PRO", async () => {
+      const accountWrapper = ".account-wrapper"
+      const proLink = '#accountPopup a[title="iProperty PRO"]'
+
+      try {
+        await randomMouseMove(page, { moves: 2 })
+        await randomDelay(300, 700)
+
+        await page.waitForSelector(accountWrapper, { visible: true, timeout: 15000 })
+        await page.click(accountWrapper)
+        await randomDelay(400, 900) // let the popup animate in before clicking
+
+        await page.waitForSelector("#accountPopup", { visible: true, timeout: 10000 })
+        await page.waitForSelector(proLink, { visible: true, timeout: 10000 })
+
+        await Promise.all([
+          page.waitForNavigation({ waitUntil: ["domcontentloaded", "networkidle2"] }),
+          page.click(proLink),
+        ])
+        log("Reached PRO area via account menu")
+      } catch (err) {
+        // Not logged in (popup shows login, no PRO link) or the layout changed —
+        // fall back to the direct listings URL so the login flow can still proceed.
+        log(`Account-menu path unavailable (${err.message}); falling back to direct listings URL`)
+        await gotoWithRetry(LISTINGS_URL, "Listings navigation (fallback)")
       }
     })
 
