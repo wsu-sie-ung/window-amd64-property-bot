@@ -228,7 +228,7 @@ const runBot = async (options = {}) => {
 
     const button = await runStep("Wait add property button", async () => {
       try {
-        return await page.waitForSelector('button[data-test="btn-add-property"]', { timeout: 15000 })
+        return await page.waitForSelector('[da-id="page-header-create-listing-button"]', { timeout: 15000 })
       } catch (err) {
         throw new Error(`Add property button not found (url=${page.url()})`)
       }
