@@ -2,6 +2,7 @@ const fs = require("fs")
 const path = require("path")
 const { connect } = require("puppeteer-real-browser");
 const StealthPlugin = require("puppeteer-extra-plugin-stealth");
+const UserPrefsPlugin = require("puppeteer-extra-plugin-user-preferences");
 const utils = require("./utils");
 
 const {
