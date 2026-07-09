@@ -1,10 +1,8 @@
 const fs = require("fs")
 const path = require("path")
-const puppeteer = require("puppeteer-extra");
+const { connect } = require("puppeteer-real-browser");
 const StealthPlugin = require("puppeteer-extra-plugin-stealth");
 const utils = require("./utils");
-
-puppeteer.use(StealthPlugin());
 
 const {
   log,
@@ -93,18 +91,22 @@ const runBot = async (options = {}) => {
 
   let browser
   try {
-    browser = await puppeteer.launch({
+    // puppeteer-real-browser runs a CDP-patched runtime (fixes the Runtime.enable
+    // leak Cloudflare detects) and can auto-solve the Turnstile checkbox. It returns
+    // the prepared page directly — do NOT call browser.newPage().
+    const connection = await connect({
       headless: isHeadless,
-      slowMo: 50,
-      userDataDir,
-      executablePath,
+      turnstile: true,
       args: launchArgs,
-      // Drop Puppeteer's default --enable-automation flag so the browser doesn't
-      // announce itself (navigator.webdriver=true + automation infobar).
-      ignoreDefaultArgs: ["--enable-automation"]
+      customConfig: {
+        chromePath: executablePath,
+        userDataDir,
+      },
+      connectOption: { defaultViewport: null },
+      plugins: [StealthPlugin()],
     })
-
-    const page = await browser.newPage()
+    browser = connection.browser
+    const page = connection.page
     // Non-fatal: Log errors from the website's own scripts (don't stop bot)
     page.on("pageerror", err => console.warn(new Date().toISOString(), "PAGE JS ERROR (NON-FATAL)", err))
 
