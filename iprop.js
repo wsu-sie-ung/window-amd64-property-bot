@@ -127,7 +127,7 @@ const runBot = async (options = {}) => {
       const maxRetries = 3;
       for (let i = 0; i < maxRetries; i++) {
         try {
-          await page.goto("https://www.iproperty.com.my/pro/listings", { waitUntil: ["domcontentloaded", "networkidle2"] });
+          await page.goto("https://www.iproperty.com.my/pro/listings?lang=en-GB", { waitUntil: ["domcontentloaded", "networkidle2"] });
           return; // Success
         } catch (err) {
           if (i === maxRetries - 1) throw err; // Throw on last retry
