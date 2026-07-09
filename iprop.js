@@ -98,7 +98,10 @@ const runBot = async (options = {}) => {
       slowMo: 50,
       userDataDir,
       executablePath,
-      args: launchArgs
+      args: launchArgs,
+      // Drop Puppeteer's default --enable-automation flag so the browser doesn't
+      // announce itself (navigator.webdriver=true + automation infobar).
+      ignoreDefaultArgs: ["--enable-automation"]
     })
 
     const page = await browser.newPage()
