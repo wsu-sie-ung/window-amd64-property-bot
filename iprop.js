@@ -241,6 +241,132 @@ const runBot = async (options = {}) => {
       ])
     )
 
+    // ---- Fill the create-listing form (v2: /pro/v2/add-listing) ----
+    // iProperty's form shares PropertyGuru's design system (same da-id / hui-*
+    // elements), so this mirrors the propguru.js sequence, driven by unitInfo.
+    // Every selector lives in utils.js. NOTE: these selectors were validated on
+    // the PropertyGuru/older form — if a step fails on v2, its runStep label
+    // pinpoints the exact selector to update.
+    if (!options.unitInfo) throw new Error("unitInfo missing from options payload")
+    const unitInfo = options.unitInfo
+
+    // --- Step 1: category / transaction type / availability ---
+    await runStep("Select property category", async () => utils.selectPropertyCategory(page, unitInfo))
+    await randomDelay(500, 1000)
+
+    await runStep("Select transaction type", async () => utils.selectTransactionType(page, unitInfo))
+    await randomMouseMove(page)
+
+    if (unitInfo.type === 2) {
+      await runStep("Select renting option", async () => utils.selectRentingOption(page, unitInfo))
+    }
+
+    await runStep("Select immediate date", async () => utils.selectImmediateDate(page))
+    await runStep("Next → step 2", async () => utils.clickNextButton(page))
+    await randomDelay(500, 1000)
+
+    // --- Step 2: property name / location / unit type ---
+    await runStep("Type property name", async () => utils.typePropertyName(page, unitInfo))
+    await randomMouseMove(page)
+    await runStep("Select first property from dropdown", async () => utils.selectFirstPropertyFromDropdown(page))
+    await randomDelay(500, 1000)
+
+    await runStep("Select unit type", async () => utils.selectUnitType(page, unitInfo.unit_type))
+
+    const isRentRoom = unitInfo.type === 2 && unitInfo.renting_opt === 0
+
+    if (isRentRoom) {
+      // --- Rent-a-room flow ---
+      await runStep("Next → room details", async () => utils.clickNextButton(page))
+      await randomDelay(500, 1000)
+
+      await runStep("Select room type", async () => utils.selectRoomType(page, unitInfo.room_type))
+      await runStep("Input room size", async () => utils.inputRoomSize(page, unitInfo.room_size))
+      await randomMouseMove(page)
+      await runStep("Set bathrooms", async () => utils.setBathrooms(page, unitInfo))
+      await runStep("Set parking", async () => utils.setParking(page, unitInfo))
+      await runStep("Set furnishing status", async () => utils.setFurnishingStatus(page, unitInfo))
+      await runStep("Set number of tenants", async () => utils.setNumberOfTenants(page, unitInfo.tenants))
+      await runStep("Set allowed gender", async () => utils.setAllowedGender(page, unitInfo.gender))
+    } else {
+      // --- Entire-unit flow ---
+      await runStep("Select title type", async () => utils.selectTitleType(page, unitInfo))
+      await runStep("Select direction", async () => utils.selectDirection(page, unitInfo))
+      await runStep("Next → unit details", async () => utils.clickNextButton(page))
+      await randomDelay(500, 1000)
+
+      await runStep("Fill rooms (bed/bath)", async () => utils.fillRooms(page, unitInfo))
+      await randomMouseMove(page)
+      await runStep("Set built-up size", async () => utils.setBuiltUpSize(page, unitInfo))
+      await runStep("Set land area", async () => utils.setLandArea(page, unitInfo))
+      await runStep("Set parking", async () => utils.setParking(page, unitInfo))
+      await runStep("Set furnishing status", async () => utils.setFurnishingStatus(page, unitInfo))
+    }
+
+    // --- Price ---
+    await runStep("Next → price", async () => utils.clickNextButton(page))
+    await randomDelay(500, 1000)
+    await runStep("Set asking/rental price", async () => utils.setRentalPrice(page, unitInfo))
+    await randomMouseMove(page)
+
+    // --- Headline / description ---
+    await runStep("Next → description", async () => utils.clickNextButton(page))
+    await randomDelay(500, 1000)
+    await runStep("Set headline", async () => utils.setHeadline(page, unitInfo))
+    await randomDelay(500, 1000)
+    await runStep("Set property description", async () => utils.setPropertyDescription(page, unitInfo))
+    await randomMouseMove(page)
+
+    // --- Photos ---
+    await runStep("Next → photos", async () => utils.clickNextButton(page))
+    await utils.handleNewFeatureModal(page)
+    await runStep("Upload images", async () => utils.uploadImages(page, unitInfo))
+    await randomMouseMove(page)
+    await utils.delay(10000)
+
+    // --- Posting plan ---
+    await runStep("Next → posting plan", async () => utils.clickNextButton(page))
+    await utils.closeDuplicatedImageAlert(page)
+    await utils.handleNewFeatureModal(page)
+
+    await runStep("Reset posting plans", async () => {
+      await utils.uncheckIProp(page)
+      await utils.uncheckPropertyGuru(page)
+    })
+    if (options.post_to_propertyguru) {
+      await runStep("Check PropertyGuru plan", async () => utils.checkPropertyGuru(page))
+    }
+    if (options.post_to_iproperty) {
+      await runStep("Check iProperty plan", async () => utils.checkIProp(page))
+    }
+    await utils.closeDuplicatedImageAlert(page)
+
+    // --- Preview + post ---
+    await runStep("Next → preview", async () => utils.clickNextButton(page))
+    await utils.handlePreviewLoadingErrorModal(page)
+
+    // DRY_RUN=true fills the whole form but skips the real submission (no credits spent).
+    if (process.env.DRY_RUN === "true") {
+      log("DRY RUN: form filled; skipping Post Now + Confirm (no listing posted, no credits spent)")
+      return { success: true, captchaDetected: false, dryRun: true }
+    }
+
+    await runStep("Click Post Now", async () => utils.clickPostNow(page))
+
+    // Confirm posting modal — WARNING: this performs a real post (spends credits).
+    await runStep("Confirm posting", async () => {
+      const confirmModalSelector = ".modal-dialog.modal-sm.modal-dialog-centered"
+      await page.waitForSelector(confirmModalSelector, { visible: true, timeout: 5000 })
+      const confirmBtnSelector = `${confirmModalSelector} button.btn-primary`
+      await page.waitForSelector(confirmBtnSelector, { visible: true, timeout: 5000 })
+      await page.evaluate(selector => {
+        const btn = document.querySelector(selector)
+        if (btn) { btn.scrollIntoView({ block: "center" }); btn.click() }
+      }, confirmBtnSelector)
+      log('"Confirm" button clicked')
+    })
+
+    log("All steps complete. Listing submitted.")
     return { success: true, captchaDetected: false }
 
   } catch (err) {
