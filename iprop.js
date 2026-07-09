@@ -121,7 +121,9 @@ const runBot = async (options = {}) => {
       if (/cdn-cgi\/challenge-platform/i.test(url)) {
         botChallengeDetected = true
         console.error(new Date().toISOString(), "BOT CHALLENGE DETECTED", url, failure)
-        try { await page.close() } catch (e) { }
+        try { 
+          // await page.close() 
+        } catch (e) { }
         return
       }
       throw new Error(`REQUEST FAILED: ${url} ${failure}`)
