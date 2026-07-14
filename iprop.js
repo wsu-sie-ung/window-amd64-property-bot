@@ -188,6 +188,9 @@ const runBot = async (options = {}) => {
       const detected = await checkAndPauseIfCaptcha(page, false)
       if (!detected) return
       log(`${label}: CAPTCHA detected — attempting CapSolver`)
+      // Let the Turnstile iframe finish attaching before we scrape its
+      // sitekey — page.frames() won't list it until it's loaded.
+      await randomDelay(1500, 2500)
       const token = await solveTurnstile(page)
       if (token) {
         await randomDelay(1000, 2000)

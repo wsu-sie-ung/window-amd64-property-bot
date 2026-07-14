@@ -37,8 +37,23 @@ const sleep = (ms) => new Promise((res) => setTimeout(res, ms))
  * Returns null if no Turnstile widget is present.
  */
 async function extractTurnstileParams(page) {
-  return page.evaluate(() => {
-    const widget = document.querySelector(".cf-turnstile, [data-sitekey]")
+  // 1) Embedded widget in the light DOM with an explicit sitekey. `deepQuery`
+  //    also pierces open shadow roots, so this catches widgets whose host page
+  //    renders the .cf-turnstile div inside a shadow tree.
+  const domParams = await page.evaluate(() => {
+    const deepQuery = (root, selector) => {
+      const hit = root.querySelector(selector)
+      if (hit) return hit
+      for (const el of root.querySelectorAll("*")) {
+        if (el.shadowRoot) {
+          const nested = deepQuery(el.shadowRoot, selector)
+          if (nested) return nested
+        }
+      }
+      return null
+    }
+
+    const widget = deepQuery(document, "[data-sitekey]")
     if (widget && widget.getAttribute("data-sitekey")) {
       return {
         websiteKey: widget.getAttribute("data-sitekey"),
@@ -46,19 +61,24 @@ async function extractTurnstileParams(page) {
         cdata: widget.getAttribute("data-cdata") || undefined,
       }
     }
-
-    // Managed-challenge interstitial: sitekey is a `0x...` segment in the
-    // challenges.cloudflare.com iframe URL.
-    const iframe = document.querySelector(
-      'iframe[src*="challenges.cloudflare.com"]'
-    )
-    if (iframe) {
-      const match = iframe.getAttribute("src").match(/0x[A-Za-z0-9_-]+/)
-      if (match) return { websiteKey: match[0] }
-    }
-
     return null
   })
+  if (domParams) return domParams
+
+  // 2) Managed-challenge / shadow-hosted widget: the sitekey is a `0x...`
+  //    segment in the challenges.cloudflare.com frame URL. document.querySelector
+  //    can't pierce shadow roots or cross-origin frames, but Puppeteer's frame
+  //    tree tracks EVERY frame via CDP — so read the sitekey straight from the
+  //    frame URL instead of the DOM. This is why extraction was returning null.
+  for (const frame of page.frames()) {
+    const url = frame.url()
+    if (/challenges\.cloudflare\.com/i.test(url) && /turnstile/i.test(url)) {
+      const match = url.match(/0x[A-Za-z0-9_-]+/)
+      if (match) return { websiteKey: match[0] }
+    }
+  }
+
+  return null
 }
 
 /** Create a CapSolver task and return its taskId. */
