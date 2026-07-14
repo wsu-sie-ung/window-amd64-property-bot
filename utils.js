@@ -98,7 +98,15 @@ async function checkAndPauseIfCaptcha(page, autoPause = true) {
     await page.$('#captcha') ||
     await page.$('.g-recaptcha') ||
     await page.$('.h-captcha') ||
-    await page.$('iframe[src*="captcha"]')
+    await page.$('iframe[src*="captcha"]') ||
+    // Cloudflare Turnstile. The managed-challenge widget is an injected iframe
+    // (id="cf-chl-widget-XXXXX", title="Widget containing a Cloudflare security
+    // challenge") and may have no .cf-turnstile wrapper, so match the iframe too.
+    await page.$('.cf-turnstile') ||
+    await page.$('iframe[src*="challenges.cloudflare.com"]') ||
+    await page.$('iframe[id^="cf-chl-widget-"]') ||
+    await page.$('iframe[title*="Cloudflare security challenge"]') ||
+    await page.$('[name="cf-turnstile-response"]')
 
   if (captchaDetected) {
     log("CAPTCHA DETECTED")
