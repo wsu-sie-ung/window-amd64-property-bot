@@ -4,6 +4,7 @@ const { connect } = require("puppeteer-real-browser");
 const StealthPlugin = require("puppeteer-extra-plugin-stealth");
 const UserPrefsPlugin = require("puppeteer-extra-plugin-user-preferences");
 const utils = require("./utils");
+const { solveTurnstile } = require("./capsolver");
 
 const {
   log,
@@ -182,8 +183,24 @@ const runBot = async (options = {}) => {
       }
     })
 
-    const captchaDetected = await runStep("Check CAPTCHA", async () => checkAndPauseIfCaptcha(page, false))
-    if (captchaDetected) throw new Error("CAPTCHA detected")
+    // If a Turnstile/CAPTCHA is detected, try CapSolver before giving up.
+    const handleCaptcha = async (label) => {
+      const detected = await checkAndPauseIfCaptcha(page, false)
+      if (!detected) return
+      log(`${label}: CAPTCHA detected — attempting CapSolver`)
+      const token = await solveTurnstile(page)
+      if (token) {
+        await randomDelay(1000, 2000)
+        const stillBlocked = await checkAndPauseIfCaptcha(page, false)
+        if (!stillBlocked) {
+          log(`${label}: CapSolver cleared the challenge`)
+          return
+        }
+      }
+      throw new Error("CAPTCHA detected")
+    }
+
+    await runStep("Check CAPTCHA", async () => handleCaptcha("pre-login"))
 
     const needsLogin = await page.$("#login-userid").then(Boolean)
 
@@ -211,8 +228,7 @@ const runBot = async (options = {}) => {
         page.goto("https://www.iproperty.com.my/pro/listings", { waitUntil: ["domcontentloaded", "networkidle2"] })
       )
 
-      const captchaDetected2 = await runStep("Check CAPTCHA post-login", async () => checkAndPauseIfCaptcha(page, false))
-      if (captchaDetected2) throw new Error("CAPTCHA detected")
+      await runStep("Check CAPTCHA post-login", async () => handleCaptcha("post-login"))
 
       await runStep("Verify login succeeded", async () => {
         const stillLogin = await isLoginPage(page)
