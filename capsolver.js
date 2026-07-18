@@ -252,6 +252,13 @@ async function solveTurnstile(page, options = {}) {
 // "ip:port:user:pass". Env override wins; falls back to the provisioned proxy.
 const CAPSOLVER_PROXY = process.env.CAPSOLVER_PROXY || "43.217.199.44:3128"
 
+// CapSolver's AntiCloudflareTask accepts a Chrome user-agent ONLY. The bot runs
+// Edge, whose UA carries an "Edg/<ver>" (or "EdgA/", "EdgiOS/", legacy "Edge/")
+// token that CapSolver rejects. Strip it to yield the equivalent plain Chrome UA.
+function toChromeUA(ua) {
+  return ua.replace(/\s+Edg(?:e|A|iOS)?\/[\d.]+/gi, "").trim()
+}
+
 /** Create an AntiCloudflareTask and return its taskId. */
 async function createChallengeTask({ websiteURL, proxy, userAgent }) {
   const task = {
@@ -316,10 +323,21 @@ async function solveCloudflareChallenge(page, options = {}) {
   }
 
   const websiteURL = options.websiteURL || page.url()
-  // Pass our real userAgent so CapSolver solves with a matching one — the
-  // cf_clearance cookie is bound to it.
-  const userAgent =
+  // Pass our userAgent so CapSolver solves with a matching one — the cf_clearance
+  // cookie is bound to it. CapSolver only accepts Chrome UAs, so if the browser is
+  // Edge we switch to the equivalent Chrome UA AND set it on the page, so the
+  // browser presents the same UA the cookie will be bound to.
+  let userAgent =
     options.userAgent || (await page.evaluate(() => navigator.userAgent))
+  if (/Edg(?:e|A|iOS)?\//i.test(userAgent)) {
+    userAgent = toChromeUA(userAgent)
+    log(`CapSolver: browser UA is Edge — using Chrome UA for solve + page: ${userAgent}`)
+    try {
+      await page.setUserAgent(userAgent)
+    } catch (e) {
+      log(`CapSolver: setUserAgent(pre-solve) failed — ${e.message}`)
+    }
+  }
 
   log(`CapSolver: solving Cloudflare Challenge for ${websiteURL}`)
 
