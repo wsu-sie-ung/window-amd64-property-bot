@@ -4,7 +4,7 @@ const { connect } = require("puppeteer-real-browser");
 const StealthPlugin = require("puppeteer-extra-plugin-stealth");
 const UserPrefsPlugin = require("puppeteer-extra-plugin-user-preferences");
 const utils = require("./utils");
-const { solveTurnstile } = require("./capsolver");
+const { solveCaptcha } = require("./capsolver");
 
 const {
   log,
@@ -195,15 +195,11 @@ const runBot = async (options = {}) => {
       // Let the Turnstile iframe finish attaching before we scrape its
       // sitekey — page.frames() won't list it until it's loaded.
       await randomDelay(1500, 2500)
-      const token = await solveTurnstile(page)
-      if (token) {
-        if (wasInterstitial) {
-          // The managed interstitial reloads to the target page once the
-          // token validates — wait for that nav (best-effort).
-          await page.waitForNavigation({ waitUntil: ["domcontentloaded", "networkidle2"], timeout: 20000 }).catch(() => {})
-        } else {
-          await randomDelay(1000, 2000)
-        }
+      // solveCaptcha tries the Turnstile widget first, then falls back to the
+      // Cloudflare managed-challenge path (which reloads the page itself).
+      const solved = await solveCaptcha(page)
+      if (solved) {
+        await randomDelay(1000, 2000)
         const stillBlocked = await checkAndPauseIfCaptcha(page, false)
         if (!stillBlocked) {
           botChallengeDetected = false // clear so the run doesn't report a captcha

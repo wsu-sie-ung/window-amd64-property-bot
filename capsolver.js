@@ -135,8 +135,8 @@ async function createTask({ websiteURL, websiteKey, action, cdata }) {
   return data.taskId
 }
 
-/** Poll getTaskResult until the token is ready (or we time out). */
-async function waitForToken(taskId) {
+/** Poll getTaskResult until ready (or we time out); returns the solution object. */
+async function waitForSolution(taskId) {
   for (let attempt = 0; attempt < MAX_POLL_ATTEMPTS; attempt++) {
     await sleep(POLL_INTERVAL_MS)
 
@@ -151,7 +151,7 @@ async function waitForToken(taskId) {
       )
     }
     if (data.status === "ready") {
-      return data.solution.token
+      return data.solution
     }
     log(`CapSolver task ${taskId} still processing (attempt ${attempt + 1})`)
   }
@@ -222,15 +222,165 @@ async function solveTurnstile(page, options = {}) {
     const taskId = await createTask({ ...params, websiteURL })
     log(`CapSolver: task created ${taskId}`)
 
-    const token = await waitForToken(taskId)
+    const solution = await waitForSolution(taskId)
     log("CapSolver: token received, injecting into page")
 
-    await injectToken(page, token)
-    return token
+    await injectToken(page, solution.token)
+    return solution.token
   } catch (err) {
     log(`CapSolver: solve failed — ${err.message}`)
     return null
   }
 }
 
-module.exports = { solveTurnstile }
+// ---------------------------------------------------------------------------
+// Cloudflare managed Challenge (the "Just a moment…" interstitial).
+//
+// When CapSolver reports "The sitekey is challenge, not turnstile", the widget
+// is NOT an embeddable Turnstile — it's the full-page managed challenge, which
+// AntiTurnstileTaskProxyLess cannot solve. That needs AntiCloudflareTask, which:
+//   - REQUIRES a static/sticky proxy (no proxyless variant), and
+//   - returns a cf_clearance COOKIE (+ userAgent), not a token.
+//
+// CRITICAL: cf_clearance is bound to the IP + userAgent that solved it. For the
+// injected cookie to be accepted, the browser must egress through the SAME proxy
+// and use the SAME userAgent. Set CAPSOLVER_PROXY and route the browser through
+// it (launch arg --proxy-server), or this will not clear the challenge.
+// ---------------------------------------------------------------------------
+
+// Static/sticky proxy for AntiCloudflareTask, e.g. "ip:port:user:pass".
+const CAPSOLVER_PROXY = process.env.CAPSOLVER_PROXY || ""
+
+/** Create an AntiCloudflareTask and return its taskId. */
+async function createChallengeTask({ websiteURL, proxy, userAgent }) {
+  const task = {
+    type: "AntiCloudflareTask",
+    websiteURL,
+    proxy,
+  }
+  if (userAgent) task.userAgent = userAgent
+
+  // Log payload with proxy credentials masked.
+  log(
+    "CapSolver createChallengeTask payload: " +
+      JSON.stringify({ ...task, proxy: proxy ? "<proxy set>" : "<none>" })
+  )
+
+  let data
+  try {
+    const res = await axios.post(`${CAPSOLVER_BASE}/createTask`, {
+      clientKey: CAPSOLVER_API_KEY,
+      task,
+    })
+    data = res.data
+    log("CapSolver createChallengeTask response: " + JSON.stringify(data))
+  } catch (err) {
+    const status = err.response && err.response.status
+    const body = err.response && err.response.data
+    log(
+      `CapSolver createChallengeTask HTTP ERROR: status=${status} body=${JSON.stringify(body)}`
+    )
+    throw new Error(
+      `CapSolver createChallengeTask HTTP ${status}: ${
+        body ? JSON.stringify(body) : err.message
+      }`
+    )
+  }
+
+  if (data.errorId) {
+    throw new Error(
+      `CapSolver createChallengeTask failed: errorId=${data.errorId} ${data.errorCode} ${data.errorDescription}`
+    )
+  }
+  if (!data.taskId) {
+    throw new Error(
+      "CapSolver createChallengeTask returned no taskId: " + JSON.stringify(data)
+    )
+  }
+  return data.taskId
+}
+
+/**
+ * Solve the full-page Cloudflare managed Challenge via AntiCloudflareTask and
+ * apply the returned cf_clearance cookie + userAgent to the page, then reload.
+ * @returns {Promise<string|null>} the cf_clearance value if solved, else null.
+ */
+async function solveCloudflareChallenge(page, options = {}) {
+  const proxy = options.proxy || CAPSOLVER_PROXY
+  if (!proxy) {
+    log(
+      "CapSolver: AntiCloudflareTask needs a proxy but CAPSOLVER_PROXY is not set — cannot solve the managed challenge. Set CAPSOLVER_PROXY and route the browser through the same proxy."
+    )
+    return null
+  }
+
+  const websiteURL = options.websiteURL || page.url()
+  // Pass our real userAgent so CapSolver solves with a matching one — the
+  // cf_clearance cookie is bound to it.
+  const userAgent =
+    options.userAgent || (await page.evaluate(() => navigator.userAgent))
+
+  log(`CapSolver: solving Cloudflare Challenge for ${websiteURL}`)
+
+  try {
+    const taskId = await createChallengeTask({ websiteURL, proxy, userAgent })
+    log(`CapSolver: challenge task created ${taskId}`)
+
+    const solution = await waitForSolution(taskId)
+    const cfClearance =
+      (solution.cookies && solution.cookies.cf_clearance) || solution.token
+    if (!cfClearance) {
+      log("CapSolver: challenge solution had no cf_clearance: " + JSON.stringify(solution))
+      return null
+    }
+    log("CapSolver: cf_clearance received, applying cookie + userAgent")
+
+    // cf_clearance is set on the registrable domain (leading dot). Best-effort:
+    // set it on the current host AND its parent domain.
+    const host = new URL(websiteURL).hostname
+    const parent = host.split(".").slice(-3).join(".") // e.g. iproperty.com.my
+    const cookies = [
+      { name: "cf_clearance", value: cfClearance, domain: host, path: "/", secure: true, httpOnly: true },
+      { name: "cf_clearance", value: cfClearance, domain: "." + parent, path: "/", secure: true, httpOnly: true },
+    ]
+    for (const c of cookies) {
+      try {
+        await page.setCookie(c)
+      } catch (e) {
+        log(`CapSolver: setCookie(${c.domain}) failed — ${e.message}`)
+      }
+    }
+
+    // The browser MUST use the same UA the cookie was solved with.
+    if (solution.userAgent) {
+      try {
+        await page.setUserAgent(solution.userAgent)
+      } catch (e) {
+        log(`CapSolver: setUserAgent failed — ${e.message}`)
+      }
+    }
+
+    await page.reload({ waitUntil: ["domcontentloaded", "networkidle2"] }).catch(() => {})
+    return cfClearance
+  } catch (err) {
+    log(`CapSolver: challenge solve failed — ${err.message}`)
+    return null
+  }
+}
+
+/**
+ * Unified entry point: try the Turnstile widget path first (proxyless, cheap);
+ * if that yields nothing (e.g. CapSolver reports the sitekey is a managed
+ * challenge), fall back to the Cloudflare Challenge path (AntiCloudflareTask).
+ * @returns {Promise<boolean>} true if a challenge was solved, else false.
+ */
+async function solveCaptcha(page, options = {}) {
+  const token = await solveTurnstile(page, options)
+  if (token) return true
+
+  log("CapSolver: Turnstile path did not clear it — trying Cloudflare Challenge (AntiCloudflareTask)")
+  const cf = await solveCloudflareChallenge(page, options)
+  return Boolean(cf)
+}
+
+module.exports = { solveTurnstile, solveCloudflareChallenge, solveCaptcha }
