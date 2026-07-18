@@ -184,18 +184,29 @@ const runBot = async (options = {}) => {
     })
 
     // If a Turnstile/CAPTCHA is detected, try CapSolver before giving up.
+    // Triggers on either an inline widget (checkAndPauseIfCaptcha) OR the
+    // full-page managed interstitial (botChallengeDetected, set by the
+    // cdn-cgi/challenge-platform requestfailed handler above).
     const handleCaptcha = async (label) => {
-      const detected = await checkAndPauseIfCaptcha(page, false)
+      const wasInterstitial = botChallengeDetected
+      const detected = (await checkAndPauseIfCaptcha(page, false)) || wasInterstitial
       if (!detected) return
-      log(`${label}: CAPTCHA detected — attempting CapSolver`)
+      log(`${label}: ${wasInterstitial ? "interstitial challenge" : "CAPTCHA"} detected — attempting CapSolver`)
       // Let the Turnstile iframe finish attaching before we scrape its
       // sitekey — page.frames() won't list it until it's loaded.
       await randomDelay(1500, 2500)
       const token = await solveTurnstile(page)
       if (token) {
-        await randomDelay(1000, 2000)
+        if (wasInterstitial) {
+          // The managed interstitial reloads to the target page once the
+          // token validates — wait for that nav (best-effort).
+          await page.waitForNavigation({ waitUntil: ["domcontentloaded", "networkidle2"], timeout: 20000 }).catch(() => {})
+        } else {
+          await randomDelay(1000, 2000)
+        }
         const stillBlocked = await checkAndPauseIfCaptcha(page, false)
         if (!stillBlocked) {
+          botChallengeDetected = false // clear so the run doesn't report a captcha
           log(`${label}: CapSolver cleared the challenge`)
           return
         }

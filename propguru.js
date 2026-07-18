@@ -133,19 +133,29 @@ const runBot = async (options = {}) => {
 
     // If a Turnstile/CAPTCHA is detected, try CapSolver before giving up.
     // PropGuru runs plain puppeteer-extra (no built-in Turnstile auto-solve),
-    // so CapSolver is the ONLY solver here.
+    // so CapSolver is the ONLY solver here. Triggers on either an inline widget
+    // (checkAndPauseIfCaptcha) OR the full-page managed interstitial
+    // (botChallengeDetected, set by the cdn-cgi/challenge-platform handler).
     const handleCaptcha = async (label) => {
-      const detected = await utils.checkAndPauseIfCaptcha(page, false);
+      const wasInterstitial = botChallengeDetected;
+      const detected = (await utils.checkAndPauseIfCaptcha(page, false)) || wasInterstitial;
       if (!detected) return;
-      utils.log(`${label}: CAPTCHA detected — attempting CapSolver`);
+      utils.log(`${label}: ${wasInterstitial ? "interstitial challenge" : "CAPTCHA"} detected — attempting CapSolver`);
       // Let the Turnstile iframe finish attaching before scraping its sitekey —
       // page.frames() won't list it until it's loaded.
       await utils.randomDelay(1500, 2500);
       const token = await solveTurnstile(page);
       if (token) {
-        await utils.randomDelay(1000, 2000);
+        if (wasInterstitial) {
+          // The managed interstitial reloads to the target page once the token
+          // validates — wait for that nav (best-effort).
+          await page.waitForNavigation({ waitUntil: ["domcontentloaded", "networkidle2"], timeout: 20000 }).catch(() => {});
+        } else {
+          await utils.randomDelay(1000, 2000);
+        }
         const stillBlocked = await utils.checkAndPauseIfCaptcha(page, false);
         if (!stillBlocked) {
+          botChallengeDetected = false; // clear so the run doesn't report a captcha
           utils.log(`${label}: CapSolver cleared the challenge`);
           return;
         }
