@@ -168,6 +168,19 @@ async function injectToken(page, token) {
  *          (no widget found, or solving failed).
  */
 async function solveTurnstile(page, options = {}) {
+  // Diagnostic: dump the frame tree so we can confirm on the real box whether
+  // the challenges.cloudflare.com frame URL (with the 0x... sitekey) is visible
+  // to page.frames() at solve time. If it shows as about:blank the iframe hasn't
+  // navigated yet (increase the settle delay); if it's the cf-chl-widget managed
+  // interstitial, a proxyless token may not be accepted.
+  log(
+    "CapSolver: frames at solve time:\n  " +
+      page
+        .frames()
+        .map((f) => f.url() || "(empty)")
+        .join("\n  ")
+  )
+
   const params = await extractTurnstileParams(page)
   if (!params) {
     log("CapSolver: no Turnstile widget found on page")
