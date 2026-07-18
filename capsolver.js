@@ -248,8 +248,9 @@ async function solveTurnstile(page, options = {}) {
 // it (launch arg --proxy-server), or this will not clear the challenge.
 // ---------------------------------------------------------------------------
 
-// Static/sticky proxy for AntiCloudflareTask, e.g. "ip:port:user:pass".
-const CAPSOLVER_PROXY = process.env.CAPSOLVER_PROXY || ""
+// Static/sticky proxy for AntiCloudflareTask, e.g. "ip:port" or
+// "ip:port:user:pass". Env override wins; falls back to the provisioned proxy.
+const CAPSOLVER_PROXY = process.env.CAPSOLVER_PROXY || "43.217.199.44:3128"
 
 /** Create an AntiCloudflareTask and return its taskId. */
 async function createChallengeTask({ websiteURL, proxy, userAgent }) {
