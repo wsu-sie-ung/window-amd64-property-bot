@@ -4,6 +4,7 @@ const puppeteer = require("puppeteer-extra");
 const StealthPlugin = require("puppeteer-extra-plugin-stealth");
 const UserPrefsPlugin = require("puppeteer-extra-plugin-user-preferences");
 const utils = require("./utils");
+const { solveTurnstile } = require("./capsolver");
 
 puppeteer.use(StealthPlugin());
 
@@ -100,7 +101,9 @@ const runBot = async (options = {}) => {
         botChallengeDetected = true;
         console.error(new Date().toISOString(), "BOT CHALLENGE DETECTED", url, failure);
         try {
-          await page.close();
+          // Keep the page open so handleCaptcha/solveTurnstile can attempt a
+          // CapSolver solve — closing it here would destroy the challenge.
+          // await page.close();
         } catch (_) { }
         return;
       }
@@ -128,16 +131,36 @@ const runBot = async (options = {}) => {
       }
     });
 
-    const captchaDetected = await utils.runStep("Check CAPTCHA", async () =>
-      utils.checkAndPauseIfCaptcha(page, false)
-    );
-    if (captchaDetected) throw new Error("CAPTCHA detected");
+    // If a Turnstile/CAPTCHA is detected, try CapSolver before giving up.
+    // PropGuru runs plain puppeteer-extra (no built-in Turnstile auto-solve),
+    // so CapSolver is the ONLY solver here.
+    const handleCaptcha = async (label) => {
+      const detected = await utils.checkAndPauseIfCaptcha(page, false);
+      if (!detected) return;
+      utils.log(`${label}: CAPTCHA detected — attempting CapSolver`);
+      // Let the Turnstile iframe finish attaching before scraping its sitekey —
+      // page.frames() won't list it until it's loaded.
+      await utils.randomDelay(1500, 2500);
+      const token = await solveTurnstile(page);
+      if (token) {
+        await utils.randomDelay(1000, 2000);
+        const stillBlocked = await utils.checkAndPauseIfCaptcha(page, false);
+        if (!stillBlocked) {
+          utils.log(`${label}: CapSolver cleared the challenge`);
+          return;
+        }
+      }
+      throw new Error("CAPTCHA detected");
+    };
+
+    await utils.runStep("Check CAPTCHA", async () => handleCaptcha("dashboard"));
 
     // Login
     const needsLogin = await utils.isLoginPage(page);
     if (needsLogin) {
       utils.log("Need Login — will do login");
       await utils.performLogin(page, options, requestedAgentId);
+      await utils.runStep("Check CAPTCHA post-login", async () => handleCaptcha("post-login"));
     }
     else utils.log("Session reused — already logged in");
 
