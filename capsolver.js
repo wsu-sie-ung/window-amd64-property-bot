@@ -94,14 +94,42 @@ async function createTask({ websiteURL, websiteKey, action, cdata }) {
     if (cdata) task.metadata.cdata = cdata
   }
 
-  const { data } = await axios.post(`${CAPSOLVER_BASE}/createTask`, {
-    clientKey: CAPSOLVER_API_KEY,
-    task,
-  })
+  // Log the exact task payload (clientKey intentionally omitted) so a
+  // malformed request / HTTP 400 is diagnosable straight from app.log.
+  log("CapSolver createTask → POST " + CAPSOLVER_BASE + "/createTask")
+  log("CapSolver createTask payload: " + JSON.stringify(task))
+
+  let data
+  try {
+    const res = await axios.post(`${CAPSOLVER_BASE}/createTask`, {
+      clientKey: CAPSOLVER_API_KEY,
+      task,
+    })
+    data = res.data
+    log("CapSolver createTask response: " + JSON.stringify(data))
+  } catch (err) {
+    // axios throws on non-2xx (e.g. HTTP 400). CapSolver puts the real reason
+    // in the response body — surface status + body, not a bare axios message.
+    const status = err.response && err.response.status
+    const body = err.response && err.response.data
+    log(
+      `CapSolver createTask HTTP ERROR: status=${status} body=${JSON.stringify(body)}`
+    )
+    throw new Error(
+      `CapSolver createTask HTTP ${status}: ${
+        body ? JSON.stringify(body) : err.message
+      }`
+    )
+  }
 
   if (data.errorId) {
     throw new Error(
-      `CapSolver createTask failed: ${data.errorCode} ${data.errorDescription}`
+      `CapSolver createTask failed: errorId=${data.errorId} ${data.errorCode} ${data.errorDescription}`
+    )
+  }
+  if (!data.taskId) {
+    throw new Error(
+      "CapSolver createTask returned no taskId: " + JSON.stringify(data)
     )
   }
   return data.taskId
