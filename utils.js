@@ -683,8 +683,9 @@ async function setHeadline(page, unitInfo) {
   await page.click(selector, { clickCount: 3 });
   await page.keyboard.press('Backspace');
 
-  // Type headline (trim to 70 chars just in case)
-  const text = headlineRow.description.trim().slice(0, 70);
+  // Type headline (trim to 70 chars just in case, title-cased)
+  const text = headlineRow.description.trim().slice(0, 70)
+    .replace(/\b\w/g, c => c.toUpperCase());
   await page.type(selector, text, { delay: 30 });
 
   console.log(`Headline set: ${text}`);
