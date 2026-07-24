@@ -685,6 +685,7 @@ async function setHeadline(page, unitInfo) {
 
   // Type headline (trim to 70 chars just in case, title-cased)
   const text = headlineRow.description.trim().slice(0, 70)
+    .toLowerCase()
     .replace(/\b\w/g, c => c.toUpperCase());
   await page.type(selector, text, { delay: 30 });
 
