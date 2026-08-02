@@ -267,20 +267,26 @@ const runBot = async (options = {}) => {
     await utils.closeDuplicatedImageAlert(page);
     await utils.handleNewFeatureModal(page);
 
-    // Reset PropertyGuru/IProperty Check box first
-    await utils.uncheckIProp(page);
-    await utils.uncheckPropertyGuru(page);
-    
+    const hasPlanCheckboxes = await page.evaluate(() => !!(
+      document.querySelector('label[da-id="ipp-posting-plan-card"] input[type="checkbox"]') ||
+      document.querySelector('label[da-id="pg-posting-plan-card"] input[type="checkbox"]')
+    ));
 
-    // here decide if this listing post to pg or iprop
-    if(options.post_to_propertyguru) {
-      await utils.checkPropertyGuru(page);
+    if (hasPlanCheckboxes) {
+      // Reset PropertyGuru/IProperty Check box first
+      await utils.uncheckIProp(page);
+      await utils.uncheckPropertyGuru(page);
+
+      // here decide if this listing post to pg or iprop
+      if (options.post_to_propertyguru) {
+        await utils.checkPropertyGuru(page);
+      }
+      if (options.post_to_iproperty) {
+        await utils.checkIProp(page);
+      }
+
+      await utils.closeDuplicatedImageAlert(page);
     }
-    if(options.post_to_iproperty) {
-      await utils.checkIProp(page);  
-    }
-    
-    await utils.closeDuplicatedImageAlert(page);
 
     await utils.clickNextButton(page);
     // await utils.handleNewFeatureModal(page);
