@@ -35,6 +35,37 @@ module.exports = {
     },
 
     {
+      // Development instance: same server, but NODE_ENV=development + DRY_RUN so
+      // the iProperty/PropertyGuru bots fill the form but NEVER post a real
+      // listing (no Post Now / Confirm, no credits spent). Runs on a separate
+      // port so it can coexist with the production instance above.
+      // Start ONLY this app with:  pm2 start ecosystem.config.js --only property-bot-dev
+      name: "property-bot-dev",
+      script: "express.js",
+      cwd: "C:/Users/Administrator/window-amd64-property-bot",
+
+      instances: 1,
+      exec_mode: "fork",
+      autorestart: true,
+      max_memory_restart: "1500M",
+      watch: false,
+      min_uptime: "30s",
+      max_restarts: 10,
+      restart_delay: 5000,
+
+      env: {
+        NODE_ENV: "development",
+        DRY_RUN: "true",
+        PORT: 3000
+      },
+
+      time: true,
+      out_file: "./logs/property-bot-dev-out.log",
+      error_file: "./logs/property-bot-dev-error.log",
+      merge_logs: true
+    },
+
+    {
       // Pre-earns Cloudflare's cf_clearance cookie for each profiles/<agent> folder
       // so the bot (property-bot) rides past the challenge. Runs real Edge, not
       // Puppeteer. See warmup.js.

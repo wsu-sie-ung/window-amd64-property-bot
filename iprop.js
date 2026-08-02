@@ -1,3 +1,4 @@
+require("dotenv").config();
 const fs = require("fs")
 const path = require("path")
 const { connect } = require("puppeteer-real-browser");
@@ -378,15 +379,14 @@ const runBot = async (options = {}) => {
     await runStep("Next → preview", async () => utils.clickNextButton(page))
     await utils.handlePreviewLoadingErrorModal(page)
 
-    // DRY_RUN=true fills the whole form but skips the real submission (no credits spent).
-    if (process.env.DRY_RUN === "true") {
-      log("DRY RUN: form filled; skipping Post Now + Confirm (no listing posted, no credits spent)")
+    // In development (or DRY_RUN=true) the whole form is filled but the real
+    // submission is skipped: no "Post Now", no "Confirm" — no credits spent.
+    if (process.env.NODE_ENV === "development" || process.env.DRY_RUN === "true") {
+      log("DEV/DRY RUN: form filled; skipping Post Now + Confirm (no listing posted, no credits spent)")
       return { success: true, captchaDetected: false, dryRun: true }
     }
 
-    if (process.env.NODE_ENV !== 'development') {
-      await runStep("Click Post Now", async () => utils.clickPostNow(page))
-    }
+    await runStep("Click Post Now", async () => utils.clickPostNow(page))
 
     // Confirm posting modal — WARNING: this performs a real post (spends credits).
     await runStep("Confirm posting", async () => {

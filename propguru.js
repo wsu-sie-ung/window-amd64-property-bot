@@ -1,3 +1,4 @@
+require("dotenv").config();
 const fs = require("fs");
 const path = require("path");
 const puppeteer = require("puppeteer-extra");
@@ -293,9 +294,14 @@ const runBot = async (options = {}) => {
     await utils.handlePreviewLoadingErrorModal(page);
     
 
-    if (process.env.NODE_ENV !== 'development') {
-      await utils.clickPostNow(page);
+    // In development (or DRY_RUN=true) the whole form is filled but the real
+    // submission is skipped: no "Post Now", no "Confirm" — no credits spent.
+    if (process.env.NODE_ENV === "development" || process.env.DRY_RUN === "true") {
+      console.log("DEV/DRY RUN: form filled; skipping Post Now + Confirm (no listing posted, no credits spent)");
+      return { success: true, captchaDetected: false, dryRun: true };
     }
+
+    await utils.clickPostNow(page);
 
     // disable the real posting when doing demo
     // await utils.handleConfirmPostWithCreditModal(page);
