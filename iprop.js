@@ -384,7 +384,9 @@ const runBot = async (options = {}) => {
       return { success: true, captchaDetected: false, dryRun: true }
     }
 
-    await runStep("Click Post Now", async () => utils.clickPostNow(page))
+    if (process.env.NODE_ENV !== 'development') {
+      await runStep("Click Post Now", async () => utils.clickPostNow(page))
+    }
 
     // Confirm posting modal — WARNING: this performs a real post (spends credits).
     await runStep("Confirm posting", async () => {

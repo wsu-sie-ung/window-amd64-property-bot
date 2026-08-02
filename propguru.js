@@ -293,7 +293,9 @@ const runBot = async (options = {}) => {
     await utils.handlePreviewLoadingErrorModal(page);
     
 
-    await utils.clickPostNow(page);
+    if (process.env.NODE_ENV !== 'development') {
+      await utils.clickPostNow(page);
+    }
 
     // disable the real posting when doing demo
     // await utils.handleConfirmPostWithCreditModal(page);
