@@ -355,17 +355,24 @@ const runBot = async (options = {}) => {
     await utils.closeDuplicatedImageAlert(page)
     await utils.handleNewFeatureModal(page)
 
-    await runStep("Reset posting plans", async () => {
-      await utils.uncheckIProp(page)
-      await utils.uncheckPropertyGuru(page)
-    })
-    if (options.post_to_propertyguru) {
-      await runStep("Check PropertyGuru plan", async () => utils.checkPropertyGuru(page))
+    const hasPlanCheckboxes = await page.evaluate(() => !!(
+      document.querySelector('label[da-id="ipp-posting-plan-card"] input[type="checkbox"]') ||
+      document.querySelector('label[da-id="pg-posting-plan-card"] input[type="checkbox"]')
+    ))
+
+    if (hasPlanCheckboxes) {
+      await runStep("Reset posting plans", async () => {
+        await utils.uncheckIProp(page)
+        await utils.uncheckPropertyGuru(page)
+      })
+      if (options.post_to_propertyguru) {
+        await runStep("Check PropertyGuru plan", async () => utils.checkPropertyGuru(page))
+      }
+      if (options.post_to_iproperty) {
+        await runStep("Check iProperty plan", async () => utils.checkIProp(page))
+      }
+      await utils.closeDuplicatedImageAlert(page)
     }
-    if (options.post_to_iproperty) {
-      await runStep("Check iProperty plan", async () => utils.checkIProp(page))
-    }
-    await utils.closeDuplicatedImageAlert(page)
 
     // --- Preview + post ---
     await runStep("Next → preview", async () => utils.clickNextButton(page))
